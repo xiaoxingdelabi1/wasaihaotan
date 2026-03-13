@@ -1,3 +1,7 @@
+/*
+ * 蛙噻！好摊 - 版权所有 2025
+ * 未经许可禁止复制、修改、分发
+ */
 const Game = {
     netCatchInterval: null,
     netCatchProgress: 0,

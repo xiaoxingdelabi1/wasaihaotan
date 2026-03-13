@@ -1,0 +1,12 @@
+# IDE
+.trae/
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temp
+*.tmp
+*.temp
