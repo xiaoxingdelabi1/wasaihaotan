@@ -1,0 +1,2450 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>蛙噻！好摊 · 摆摊模拟器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", SimSun, sans-serif;
+        }
+
+        body {
+            background-color: #ffffff;
+            color: #222222;
+            padding: 8px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            font-size: 14px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+            width: 100%;
+        }
+
+        .header-left {
+            font-size: 14px;
+        }
+
+        .ml-btn {
+            background-color: #333333;
+            color: #ffffff;
+            border: none;
+            padding: 2px 6px;
+            font-size: 12px;
+            border-radius: 2px;
+            cursor: pointer;
+            margin-left: 4px;
+        }
+
+        .header-center {
+            font-size: 16px;
+        }
+
+        .title-red {
+            color: #990000;
+            font-weight: bold;
+        }
+
+        .cloud-save {
+            color: #cc0000;
+            margin-left: 8px;
+            font-size: 14px;
+        }
+
+        .header-right {
+            font-size: 13px;
+            text-align: right;
+        }
+
+        a {
+            color: #0000cc;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        main {
+            display: flex;
+            flex: 1;
+            gap: 24px;
+            margin-bottom: 24px;
+            width: 100%;
+        }
+
+        .left-sidebar {
+            width: 180px;
+        }
+
+        .resource-item {
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .resource-name {
+            margin-right: 4px;
+        }
+
+        .resource-value {
+            font-weight: bold;
+        }
+
+        .resource-max {
+            color: #666666;
+            font-size: 14px;
+        }
+
+        /* 背包区域 (左侧) */
+        #backpackContainer {
+            margin-top: 16px;
+            border-top: 1px solid #ccc;
+            padding-top: 8px;
+        }
+        .backpack-header {
+            font-weight: bold;
+            margin-bottom: 8px;
+            cursor: help;
+            border-bottom: 1px dashed #999;
+            padding-bottom: 2px;
+            display: inline-block;
+        }
+        .backpack-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .backpack-slot {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f0f0f0;
+            padding: 4px 6px;
+            border-radius: 3px;
+            font-size: 13px;
+        }
+        .slot-info {
+            display: flex;
+            gap: 8px;
+        }
+        .use-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 2px 8px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .use-btn:hover {
+            background-color: #45a049;
+        }
+        .use-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .main-content {
+            flex: 1;
+            max-width: 700px;
+            border: 1px solid #cccccc;
+            padding: 12px;
+            border-radius: 2px;
+            min-height: 600px;
+        }
+
+        .tab-bar {
+            margin-bottom: 16px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid #cccccc;
+            flex-wrap: wrap;
+        }
+
+        .tab-bar a {
+            cursor: pointer;
+        }
+
+        .help-icon {
+            margin-left: auto;
+            font-weight: bold;
+            cursor: help;
+        }
+
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .action-btn {
+            min-width: 180px;
+            padding: 8px 16px;
+            border: 1px solid #999999;
+            background-color: #f0f0f0;
+            cursor: pointer;
+            font-size: 14px;
+            border-radius: 2px;
+        }
+
+        .action-btn:hover:not(.disabled):not(:disabled) {
+            background-color: #e0e0e0;
+        }
+
+        .action-btn.disabled,
+        .action-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background-color: #e8e8e8;
+        }
+
+        /* 主区域：可摆摊背包面板 */
+        #stallBackpackPane {
+            display: none;
+        }
+        .backpack-main-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .backpack-main-slot {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #e8f5e8;
+            padding: 8px 10px;
+            border-radius: 4px;
+            border: 1px solid #b0d4b0;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .backpack-main-slot:hover {
+            background-color: #d0ecd0;
+        }
+
+        /* 主区域集市面板 */
+        #marketShopPane {
+            display: none;
+        }
+        .shop-list {
+            font-size: 13px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            padding: 8px;
+        }
+        .shop-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px dotted #ccc;
+        }
+        .shop-item:last-child {
+            border-bottom: none;
+        }
+        .shop-item-info {
+            display: flex;
+            gap: 10px;
+        }
+        .buy-btn {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 2px 10px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .buy-btn:hover {
+            background-color: #0b7dda;
+        }
+        .buy-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* 旅馆面板 */
+        #hotelPane {
+            display: none;
+            padding: 20px;
+            text-align: center;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .hotel-title {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+        .hotel-btn {
+            background-color: #e67e22;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .hotel-btn:hover {
+            background-color: #d35400;
+        }
+        .hotel-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .right-sidebar {
+            width: 300px;
+            min-height: 600px; /* 与主内容区等高 */
+        }
+
+        .season {
+            font-size: 16px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .sidebar-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            border-bottom: 1px solid #cccccc;
+            padding-bottom: 4px;
+            align-items: center;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 4px 8px;
+        }
+
+        .tab-btn.active {
+            font-weight: bold;
+            border-bottom: 2px solid #333333;
+        }
+
+        /* 地区显示 */
+        .region-display {
+            margin-left: auto;
+            font-size: 13px;
+            color: #006600;
+        }
+
+        .tab-pane {
+            display: none;
+        }
+        .tab-pane.active {
+            display: block;
+        }
+
+        .log-content {
+            font-size: 14px;
+            line-height: 1.5;
+            max-height: 600px;  /* 增加高度 */
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+        .log-content p {
+            margin-bottom: 4px;
+            border-bottom: 1px dotted #ccc;
+            padding-bottom: 2px;
+        }
+
+        .stall-list {
+            font-size: 13px;
+            max-height: 600px;  /* 增加高度 */
+            overflow-y: auto;
+            margin-bottom: 12px;
+        }
+        .stall-item {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 8px 6px;
+            margin-bottom: 6px;
+            border-radius: 3px;
+            position: relative;
+        }
+        .stall-info {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 6px;
+        }
+        .stall-info span {
+            white-space: nowrap;
+        }
+        .remove-stall-btn {
+            background-color: #ffcccc;
+            border: 1px solid #ff8888;
+            border-radius: 3px;
+            padding: 2px 8px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .remove-stall-btn:hover {
+            background-color: #ffaaaa;
+        }
+        .stall-footer {
+            margin-top: 8px;
+            display: flex;
+            justify-content: flex-end;
+        }
+        .clear-stall-btn {
+            background-color: #e0e0e0;
+            border: 1px solid #aaa;
+            border-radius: 3px;
+            padding: 4px 10px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .clear-stall-btn:hover {
+            background-color: #d0d0d0;
+        }
+
+        /* 市场样式 */
+        .market-header, .market-item {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            padding: 4px 0;
+            border-bottom: 1px dotted #ccc;
+        }
+        .market-header {
+            font-weight: bold;
+            border-bottom: 2px solid #aaa;
+            margin-bottom: 4px;
+        }
+        .market-header span, .market-item span {
+            text-align: left;
+        }
+        .market-header span:nth-child(2), .market-item span:nth-child(2) {
+            text-align: center;
+        }
+        .market-header span:last-child, .market-item span:last-child {
+            text-align: right;
+        }
+        .market-list {
+            font-size: 13px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            padding: 8px;
+        }
+        .quality-white { color: #3e3e3e; }
+        .quality-green { color: #2e7d32; font-weight: bold; }
+        .quality-blue { color: #1565c0; font-weight: bold; }
+        .quality-purple { color: #6a1b9a; font-weight: bold; }
+        .quality-gold { color: #b8860b; font-weight: bold; }
+        .quality-red { color: #b71c1c; font-weight: bold; }
+
+        /* 成就系统样式 */
+        .achievement-list {
+            font-size: 13px;
+            max-height: 600px;
+            overflow-y: auto;
+            margin-bottom: 12px;
+        }
+        .achievement-item {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 10px 8px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+            position: relative;
+        }
+        .achievement-item.completed {
+            background-color: #e8f5e9;
+            border-color: #4caf50;
+        }
+        .achievement-item.locked {
+            background-color: #f5f5f5;
+            border-color: #bbb;
+            opacity: 0.7;
+        }
+        .achievement-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        .achievement-name {
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .achievement-item.completed .achievement-name {
+            color: #2e7d32;
+        }
+        .achievement-status {
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 3px;
+        }
+        .achievement-status.completed {
+            background-color: #4caf50;
+            color: white;
+        }
+        .achievement-status.pending {
+            background-color: #ff9800;
+            color: white;
+        }
+        .achievement-status.locked {
+            background-color: #9e9e9e;
+            color: white;
+        }
+        .achievement-desc {
+            color: #666;
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+        .achievement-reward {
+            font-size: 12px;
+            color: #2196f3;
+            margin-bottom: 8px;
+        }
+        .achievement-submit-btn {
+            background-color: #2196f3;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 4px 12px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .achievement-submit-btn:hover {
+            background-color: #1976d2;
+        }
+        .achievement-submit-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .achievement-completed-icon {
+            color: #4caf50;
+            font-size: 16px;
+        }
+
+        footer {
+            margin-top: auto;
+            text-align: right;
+            font-size: 14px;
+            padding-right: 8px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 300px;
+            border-radius: 4px;
+        }
+        .modal-content h3 {
+            margin-bottom: 16px;
+        }
+        .modal-content select, .modal-content input {
+            width: 100%;
+            margin-bottom: 12px;
+            padding: 4px;
+        }
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+        .modal-buttons button {
+            padding: 6px 12px;
+            cursor: pointer;
+        }
+        .price-input, .quantity-input {
+            margin-bottom: 12px;
+        }
+        .price-input label, .quantity-input label {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 13px;
+        }
+
+        /* 全屏开发者面板（加宽） */
+        #devPanel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            z-index: 3000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        .dev-panel-content {
+            background-color: #f0f0f0;
+            width: 95%;
+            max-width: 1400px;
+            max-height: 90vh;
+            overflow-y: auto;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+        .dev-panel-content h2 {
+            margin-bottom: 20px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 8px;
+        }
+        .dev-section {
+            margin-bottom: 24px;
+            padding: 16px;
+            background: #ffffff;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .dev-section h3 {
+            margin-bottom: 12px;
+            color: #2c3e50;
+            border-left: 4px solid #3498db;
+            padding-left: 8px;
+        }
+        .dev-section label {
+            display: inline-block;
+            width: 80px;
+            font-weight: bold;
+        }
+        .dev-section input, .dev-section select {
+            width: 180px;
+            margin: 4px;
+            padding: 6px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .dev-section button {
+            padding: 6px 12px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 4px;
+        }
+        .dev-section button:hover {
+            background-color: #2980b9;
+        }
+        .dev-item-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 8px 0;
+            font-size: 13px;
+            flex-wrap: wrap;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 8px;
+        }
+        .dev-item-row span {
+            min-width: 90px;
+            font-weight: bold;
+        }
+        .dev-item-row input {
+            width: 90px;
+        }
+        .close-dev-btn {
+            background-color: #e74c3c !important;
+        }
+        .close-dev-btn:hover {
+            background-color: #c0392b !important;
+        }
+        .dev-panel-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 16px;
+        }
+        /* 物品列表表头 */
+        .dev-list-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 8px 0;
+            font-size: 13px;
+            font-weight: bold;
+            border-bottom: 2px solid #333;
+            padding-bottom: 4px;
+        }
+        .dev-list-header span {
+            min-width: 90px;
+            text-align: center;
+        }
+        .dev-list-header .header-item {
+            width: 90px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-left">
+            蛙噻！好摊 by 咕呱工作室
+            <button class="ml-btn">呱</button>
+        </div>
+        <div class="header-center">
+            <span class="title-red">蛙摊</span> | 概览
+            <a href="#" class="cloud-save">云存档 ></a>
+        </div>
+        <div class="header-right">
+            <a href="#" id="saveGameLink">存档</a> | <a href="#" id="loadGameLink">读档</a> | 设置 | <a href="#" id="deleteSaveLink">删档</a> | 蛙信 | 蛙游 | Ver 1.0.0
+            <a href="#" id="devLink">开发者</a>
+        </div>
+    </header>
+
+    <main>
+        <!-- 左侧：金币 + 背包 -->
+        <aside class="left-sidebar">
+            <div class="resource-item">
+                <span class="resource-name">金币</span>
+                <span class="resource-value" id="coinCount">0</span>
+                <span class="resource-max">/1000</span>
+            </div>
+            <div id="backpackContainer">
+                <div class="backpack-header" id="backpackHeader" title="升级需1荷包">
+                    背包 <span id="backpackUsed">0</span>/<span id="backpackCapacity">10</span>
+                </div>
+                <div id="backpackGrid" class="backpack-grid"></div>
+            </div>
+        </aside>
+
+        <section class="main-content">
+            <div class="tab-bar">
+                <a href="#" id="tabAll">全部</a> ·
+                <a href="#" id="tabStall">可摆摊</a> ·
+                <a href="#" id="tabMarketShop">集市</a> ·
+                <a href="#" id="tabProcess">可加工</a> ·
+                <a href="#" id="tabCollect">食材收集</a> ·
+                <a href="#" id="tabHotel">旅馆</a>
+                <span class="help-icon">?</span>
+            </div>
+            <!-- 默认按钮组 -->
+            <div class="button-group" id="mainButtonGroup">
+                <button class="action-btn" id="stallBtn">出摊！</button>
+                <button class="action-btn" id="catchBugBtn">捕捉虫子</button>
+                <button class="action-btn disabled" id="skewerBtn" disabled>串虫子串</button>
+            </div>
+            <!-- 主区域：可摆摊背包面板（只显示可上架物品） -->
+            <div id="stallBackpackPane">
+                <div class="backpack-main-grid" id="stallBackpackGrid"></div>
+            </div>
+            <!-- 主区域集市面板 -->
+            <div id="marketShopPane">
+                <div class="shop-list" id="marketShopList"></div>
+            </div>
+            <!-- 主区域旅馆面板 -->
+            <div id="hotelPane">
+                <div class="hotel-title">🏨 旅馆</div>
+                <p>在这里休息一晚，可以恢复精力，并让时间推进到次日早上8:00。</p>
+                <p>住宿费用：100 金币</p>
+                <button class="hotel-btn" id="hotelStayBtn">住宿过夜</button>
+            </div>
+        </section>
+
+        <aside class="right-sidebar">
+            <div class="season">
+                <span id="gameTimeDisplay">第1年 雨季 第5天</span>
+                <span id="clockDisplay">8:00</span>
+            </div>
+            <div class="sidebar-tabs">
+                <button class="tab-btn active" id="stallTabBtn">摊位</button>
+                <button class="tab-btn" id="marketTabBtn">市场</button>
+                <button class="tab-btn" id="achievementTabBtn">成就</button>
+                <button class="tab-btn" id="logTabBtn">日志</button>
+                <span class="region-display" id="regionDisplay">地区：池塘</span>
+            </div>
+            <div id="stallPane" class="tab-pane active">
+                <div style="margin-bottom:8px; display: flex; justify-content: space-between; align-items: center;">
+                    <span>摊位 <span id="stallTabCount">0/5</span></span>
+                    <span id="upgradeCostDisplay">升级需1荷叶</span>
+                </div>
+                <div id="stallList" class="stall-list"></div>
+                <div class="stall-footer">
+                    <button class="clear-stall-btn" id="clearStallBtn">收摊（全部下架）</button>
+                </div>
+            </div>
+            <div id="marketPane" class="tab-pane">
+                <div class="market-header">
+                    <span>物品</span>
+                    <span>品质</span>
+                    <span>价格</span>
+                </div>
+                <div id="marketList" class="market-list"></div>
+            </div>
+            <div id="achievementPane" class="tab-pane">
+                <div style="margin-bottom:8px; display: flex; justify-content: space-between; align-items: center;">
+                    <span id="achievementRegionTitle">🏆 池塘地区成就</span>
+                    <span id="achievementProgress">0/5</span>
+                </div>
+                <div id="achievementList" class="achievement-list"></div>
+            </div>
+            <div id="logPane" class="tab-pane">
+                <div class="log-content" id="logList">
+                    <!-- 动态日志 -->
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <footer>
+        <a href="#">蛙百科</a> |
+        <a href="#">蛙友群</a> |
+        <a href="#">蛙员</a> |
+        <a href="#">打赏</a> |
+        <a href="#">支持</a>
+    </footer>
+
+    <!-- 出摊弹窗 -->
+    <div id="stallModal" class="modal">
+        <div class="modal-content">
+            <h3>家底儿都在这儿了，上架！</h3>
+            <select id="itemSelect"></select>
+            <div class="price-input">
+                <label>售价（金币/个）</label>
+                <input type="number" id="itemPrice" min="1" value="1">
+            </div>
+            <div class="quantity-input">
+                <label>上架数量</label>
+                <input type="number" id="itemQuantity" min="1" value="1">
+            </div>
+            <div class="modal-buttons">
+                <button id="modalCancel">取消</button>
+                <button id="modalConfirm">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 全屏开发者面板（加宽） -->
+    <div id="devPanel">
+        <div class="dev-panel-content">
+            <h2>⚙️ 开发者选项（全屏细致版）</h2>
+            <div class="dev-section">
+                <h3>💰 金币修改</h3>
+                <label>增加金币:</label>
+                <input type="number" id="devAddCoins" min="1" value="100">
+                <button id="devAddCoinsBtn">增加</button>
+                <button id="devSetCoinsBtn">设置为</button>
+                <input type="number" id="devSetCoins" min="0" value="0">
+            </div>
+            <div class="dev-section">
+                <h3>📦 存档管理</h3>
+                <button id="saveGameBtn">💾 保存到浏览器</button>
+                <button id="loadGameBtn">📂 从浏览器加载</button>
+                <button id="exportGameBtn">⬇️ 导出存档文件</button>
+                <input type="file" id="importFile" accept=".json" style="display:none;">
+                <button id="importGameBtn">⬆️ 导入存档文件</button>
+                <span style="margin-left:16px; color:#27ae60;" id="saveStatus"></span>
+            </div>
+            <div class="dev-section">
+                <h3>🌍 全局波动金额</h3>
+                <label>波动金额:</label>
+                <input type="number" id="globalVolatility" step="1" min="0" value="1">
+                <button id="setVolatilityBtn">设置</button>
+            </div>
+            <div class="dev-section">
+                <h3>➕ 添加物品到市场</h3>
+                <input type="text" id="newItemName" placeholder="名称" size="10">
+                <input type="number" id="newItemMin" placeholder="最低价">
+                <input type="number" id="newItemMax" placeholder="最高价">
+                <input type="number" id="newItemPrice" placeholder="初始价">
+                <input type="number" id="newItemVolatility" placeholder="波动金额" step="1" min="0">
+                <input type="number" id="newItemSpeed" placeholder="速度(秒/个)" min="1" step="1">
+                <input type="number" id="newItemCapacity" placeholder="容量上限" min="1" step="1" value="1">
+                <button id="addItemBtn">添加</button>
+            </div>
+            <div class="dev-section">
+                <h3>📋 物品列表编辑</h3>
+                <div class="dev-list-header">
+                    <span>名称</span>
+                    <span class="header-item">最低</span>
+                    <span class="header-item">最高</span>
+                    <span class="header-item">当前</span>
+                    <span class="header-item">波动额</span>
+                    <span class="header-item">速度</span>
+                    <span class="header-item">容量</span>
+                    <span style="width:120px;">操作</span>
+                </div>
+                <div id="devItemList"></div>
+            </div>
+            <div class="dev-section">
+                <h3>⏱️ 设置游戏时间</h3>
+                <label>年:</label><input type="number" id="setYear" value="1" min="1">
+                <label>季:</label>
+                <select id="setSeason">
+                    <option value="0">春</option>
+                    <option value="1" selected>雨</option>
+                    <option value="2">秋</option>
+                    <option value="3">冬</option>
+                </select>
+                <label>日:</label><input type="number" id="setDay" value="1" min="1" max="4">
+                <label>时:</label><input type="number" id="setHour" value="8" min="8" max="20">
+                <button id="setTimeBtn">设置</button>
+                <button id="nextDayBtn" style="margin-left:10px;">⏩ 次日</button>
+            </div>
+            <div class="dev-section">
+                <h3>➕ 添加物品到背包</h3>
+                <input list="itemNames" id="devItemName" placeholder="物品名称" style="width:200px;">
+                <datalist id="itemNames">
+                    <option value="虫子">
+                    <option value="荷叶">
+                    <option value="虫子串">
+                    <option value="荷包">
+                    <option value="小存钱罐">
+                    <option value="苹果">
+                    <option value="香蕉">
+                    <option value="钻石">
+                    <option value="神果">
+                    <option value="龙鳞">
+                    <option value="凤凰羽">
+                </datalist>
+                <input type="number" id="devItemQty" min="1" value="1" style="width:80px;">
+                <button id="addToBackpackBtn">添加到背包</button>
+            </div>
+            <div class="dev-panel-footer">
+                <button class="close-dev-btn" id="closeDevPanel">关闭开发者面板</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ---------- 工具函数：正态分布随机数 (Box-Muller) ----------
+            function normalRandom(mean, std) {
+                let u = 0, v = 0;
+                while(u === 0) u = Math.random();
+                while(v === 0) v = Math.random();
+                let z = Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
+                return mean + std * z;
+            }
+
+            function generateSaleTime(meanTime) {
+                if (meanTime <= 0) return 0.1;
+                const std = meanTime / 3;
+                let t;
+                do {
+                    t = normalRandom(meanTime, std);
+                } while (t < 0.1 || t > 2 * meanTime);
+                return t;
+            }
+
+            // ---------- 元素 ----------
+            const coinSpan = document.getElementById('coinCount');
+            const catchBtn = document.getElementById('catchBugBtn');
+            const skewerBtn = document.getElementById('skewerBtn');
+            const stallBtn = document.getElementById('stallBtn');
+
+            const modal = document.getElementById('stallModal');
+            const itemSelect = document.getElementById('itemSelect');
+            const itemPrice = document.getElementById('itemPrice');
+            const itemQuantity = document.getElementById('itemQuantity');
+            const modalCancel = document.getElementById('modalCancel');
+            const modalConfirm = document.getElementById('modalConfirm');
+
+            const logTabBtn = document.getElementById('logTabBtn');
+            const stallTabBtn = document.getElementById('stallTabBtn');
+            const marketTabBtn = document.getElementById('marketTabBtn');
+            const achievementTabBtn = document.getElementById('achievementTabBtn');
+            const logPane = document.getElementById('logPane');
+            const stallPane = document.getElementById('stallPane');
+            const marketPane = document.getElementById('marketPane');
+            const achievementPane = document.getElementById('achievementPane');
+            const stallTabCount = document.getElementById('stallTabCount');
+            const upgradeCostDisplay = document.getElementById('upgradeCostDisplay');
+            const backpackHeader = document.getElementById('backpackHeader');
+            const backpackCapacitySpan = document.getElementById('backpackCapacity');
+
+            const stallList = document.getElementById('stallList');
+            const marketList = document.getElementById('marketList');
+            const marketShopList = document.getElementById('marketShopList');
+            const stallBackpackGrid = document.getElementById('stallBackpackGrid');
+            const logList = document.getElementById('logList');
+            const achievementList = document.getElementById('achievementList');
+
+            const gameTimeDisplay = document.getElementById('gameTimeDisplay');
+            const clockDisplay = document.getElementById('clockDisplay');
+
+            const backpackUsedSpan = document.getElementById('backpackUsed');
+            const backpackGrid = document.getElementById('backpackGrid');
+
+            const mainButtonGroup = document.getElementById('mainButtonGroup');
+            const marketShopPane = document.getElementById('marketShopPane');
+            const stallBackpackPane = document.getElementById('stallBackpackPane');
+            const hotelPane = document.getElementById('hotelPane');
+            const hotelStayBtn = document.getElementById('hotelStayBtn');
+
+            const tabAll = document.getElementById('tabAll');
+            const tabStall = document.getElementById('tabStall');
+            const tabMarketShop = document.getElementById('tabMarketShop');
+            const tabProcess = document.getElementById('tabProcess');
+            const tabCollect = document.getElementById('tabCollect');
+            const tabHotel = document.getElementById('tabHotel');
+
+            // ---------- 日志系统 ----------
+            let logs = [];
+
+            // ---------- 成就系统 ----------
+            let currentRegion = '池塘';
+            let completedAchievements = []; // 已完成的成就ID列表
+            
+            // 地区成就定义
+            const regionAchievements = {
+                '池塘': [
+                    { id: 'pond_1', name: '初出茅庐', desc: '提交10只虫子', itemType: 'bug', count: 10, rewardCoins: 50, rewardItems: [] },
+                    { id: 'pond_2', name: '捕虫新手', desc: '提交30只虫子', itemType: 'bug', count: 30, rewardCoins: 150, rewardItems: [] },
+                    { id: 'pond_3', name: '串虫达人', desc: '提交5个虫子串', itemType: 'skewer', count: 5, rewardCoins: 200, rewardItems: [{ name: '荷叶', count: 2 }] },
+                    { id: 'pond_4', name: '池塘富豪', desc: '提交3片荷叶', itemType: 'leaf', count: 3, rewardCoins: 500, rewardItems: [{ name: '荷包', count: 1 }] },
+                    { id: 'pond_5', name: '池塘之王', desc: '提交50只虫子和10个虫子串', itemType: 'mixed', count: 1, rewardCoins: 1000, rewardItems: [{ name: '荷叶', count: 5 }, { name: '荷包', count: 2 }] }
+                ],
+                '森林': [
+                    { id: 'forest_1', name: '森林探索者', desc: '提交20只虫子', itemType: 'bug', count: 20, rewardCoins: 100, rewardItems: [] },
+                    { id: 'forest_2', name: '森林商人', desc: '提交50只虫子', itemType: 'bug', count: 50, rewardCoins: 300, rewardItems: [{ name: '荷叶', count: 3 }] },
+                    { id: 'forest_3', name: '串虫大师', desc: '提交20个虫子串', itemType: 'skewer', count: 20, rewardCoins: 800, rewardItems: [{ name: '荷包', count: 2 }] }
+                ],
+                '沼泽': [
+                    { id: 'swamp_1', name: '沼泽行者', desc: '提交100只虫子', itemType: 'bug', count: 100, rewardCoins: 500, rewardItems: [{ name: '荷叶', count: 5 }] },
+                    { id: 'swamp_2', name: '沼泽大亨', desc: '提交50个虫子串', itemType: 'skewer', count: 50, rewardCoins: 2000, rewardItems: [{ name: '荷包', count: 5 }] }
+                ]
+            };
+
+            function getCurrentTimeString() {
+                return gameTimeDisplay.textContent + ' ' + clockDisplay.textContent;
+            }
+
+            function addLog(message) {
+                const timeStr = getCurrentTimeString();
+                logs.unshift(timeStr + '，' + message);
+                if (logs.length > 50) logs.pop();
+                renderLogs();
+            }
+
+            function renderLogs() {
+                if (logs.length === 0) {
+                    logList.innerHTML = '<p>暂无日志</p>';
+                    return;
+                }
+                let html = '';
+                logs.forEach(log => {
+                    html += `<p>${log}</p>`;
+                });
+                logList.innerHTML = html;
+            }
+
+            // ---------- 时间系统 ----------
+            let startTimestamp = Date.now();
+            let initialDays = 4.0;
+            const seasonNames = ["春", "雨", "秋", "冬"];
+            let lastDayNumber = 5;
+
+            function updateGameTime() {
+                const now = Date.now();
+                const elapsedHours = (now - startTimestamp) / 3600000;
+                const totalDays = initialDays + elapsedHours;
+                const currentDayNumber = Math.floor(totalDays) + 1;
+
+                const dayFraction = totalDays - Math.floor(totalDays);
+                let hourFloat = 8 + 12 * dayFraction;
+                let hour = Math.floor(hourFloat);
+                let minute = Math.floor((hourFloat - hour) * 60);
+                if (hour < 8) hour = 8;
+                if (hour > 20) hour = 20;
+                const timeStr = `${hour.toString().padStart(2,'0')}:${minute.toString().padStart(2,'0')}`;
+                clockDisplay.textContent = timeStr;
+
+                const year = Math.floor((currentDayNumber - 1) / 16) + 1;
+                const seasonIndex = Math.floor(((currentDayNumber - 1) % 16) / 4);
+                const dayOfSeason = ((currentDayNumber - 1) % 4) + 1;
+
+                const seasonName = seasonNames[seasonIndex];
+                gameTimeDisplay.textContent = `第${year}年 ${seasonName}季 第${dayOfSeason}天`;
+
+                if (currentDayNumber !== lastDayNumber) {
+                    lastDayNumber = currentDayNumber;
+                    fluctuatePrices();
+                    refreshShop();
+                }
+            }
+
+            setInterval(updateGameTime, 1000);
+            updateGameTime();
+
+            // ---------- 市场物品（添加荷包）----------
+            let marketItems = [
+                { name: "虫子", minPrice: 1, maxPrice: 3, currentPrice: 1, volatility: 1, baseSpeed: 5, capacity: 60 },
+                { name: "苹果", minPrice: 3, maxPrice: 8, currentPrice: 5, volatility: 2, baseSpeed: 5, capacity: 10 },
+                { name: "香蕉", minPrice: 5, maxPrice: 12, currentPrice: 8, volatility: 2, baseSpeed: 5, capacity: 10 },
+                { name: "虫子串", minPrice: 15, maxPrice: 45, currentPrice: 25, volatility: 5, baseSpeed: 5, capacity: 10 },
+                { name: "荷叶", minPrice: 80, maxPrice: 150, currentPrice: 100, volatility: 10, baseSpeed: 5, capacity: 1 },
+                { name: "荷包", minPrice: 120, maxPrice: 180, currentPrice: 150, volatility: 10, baseSpeed: 5, capacity: 1 },
+                { name: "小存钱罐", minPrice: 280, maxPrice: 320, currentPrice: 300, volatility: 20, baseSpeed: 5, capacity: 1 },
+                { name: "钻石", minPrice: 1000, maxPrice: 2000, currentPrice: 1500, volatility: 100, baseSpeed: 5, capacity: 1 },
+                { name: "神果", minPrice: 8000, maxPrice: 15000, currentPrice: 12000, volatility: 500, baseSpeed: 5, capacity: 1 },
+                { name: "龙鳞", minPrice: 40000, maxPrice: 60000, currentPrice: 50000, volatility: 2000, baseSpeed: 5, capacity: 1 },
+                { name: "凤凰羽", minPrice: 150000, maxPrice: 250000, currentPrice: 200000, volatility: 10000, baseSpeed: 5, capacity: 1 }
+            ];
+
+            let globalVolatility = 1;
+
+            function getQualityText(price) {
+                if (price >= 100000) return '红';
+                if (price >= 10000) return '金';
+                if (price >= 1000) return '紫';
+                if (price >= 100) return '蓝';
+                if (price >= 10) return '绿';
+                return '白';
+            }
+
+            function getQualityClass(price) {
+                if (price >= 100000) return 'quality-red';
+                if (price >= 10000) return 'quality-gold';
+                if (price >= 1000) return 'quality-purple';
+                if (price >= 100) return 'quality-blue';
+                if (price >= 10) return 'quality-green';
+                return 'quality-white';
+            }
+
+            // 计算销售税：5%税率，绿色及以上最少收1金币，白色小于1金币免税
+            function calculateTax(salePrice) {
+                const taxRate = 0.05;
+                const rawTax = Math.floor(salePrice * taxRate);
+                
+                // 白色品质（价格<10）且税<1金币则免税
+                if (salePrice < 10 && rawTax < 1) {
+                    return 0;
+                }
+                
+                // 绿色及以上（价格>=10）最少收1金币
+                if (salePrice >= 10 && rawTax < 1) {
+                    return 1;
+                }
+                
+                return rawTax;
+            }
+
+            function renderMarket() {
+                const sorted = [...marketItems].sort((a, b) => a.currentPrice - b.currentPrice);
+                let html = '';
+                sorted.forEach(item => {
+                    const qualityClass = getQualityClass(item.currentPrice);
+                    const qualityText = getQualityText(item.currentPrice);
+                    html += `<div class="market-item">
+                        <span class="${qualityClass}">${item.name}</span>
+                        <span class="${qualityClass}">${qualityText}</span>
+                        <span>${item.currentPrice} 金币/个</span>
+                    </div>`;
+                });
+                marketList.innerHTML = html;
+            }
+
+            function fluctuatePrices() {
+                marketItems.forEach(item => {
+                    let totalVol = globalVolatility + item.volatility;
+                    let change = Math.floor(Math.random() * (2 * totalVol + 1)) - totalVol;
+                    let newPrice = item.currentPrice + change;
+                    if (newPrice < item.minPrice) newPrice = item.minPrice;
+                    if (newPrice > item.maxPrice) newPrice = item.maxPrice;
+                    item.currentPrice = newPrice;
+                });
+                renderMarket();
+            }
+
+            renderMarket();
+
+            // ---------- 集市商品数据（每日刷新）----------
+            const SHOP_INIT = [
+                { name: "虫子", type: "bug", baseQuantity: 5 },
+                { name: "荷叶", type: "leaf", baseQuantity: 3 },
+                { name: "虫子串", type: "skewer", baseQuantity: 2 },
+                { name: "荷包", type: "purse", baseQuantity: 2 },
+                { name: "小存钱罐", type: "piggyBank", baseQuantity: 1 }
+            ];
+            let shopItems = [];
+
+            function refreshShop() {
+                const newShop = [];
+                SHOP_INIT.forEach(s => {
+                    const marketItem = marketItems.find(m => m.name === s.name);
+                    if (marketItem) {
+                        const price = Math.round(marketItem.currentPrice * 1.5);
+                        newShop.push({
+                            name: s.name,
+                            type: s.type,
+                            price: price,
+                            quantity: s.baseQuantity,
+                            capacity: marketItem.capacity
+                        });
+                    }
+                });
+                shopItems = newShop;
+                if (marketShopPane.style.display === 'block') {
+                    renderMainShop();
+                }
+            }
+
+            refreshShop();
+
+            function renderMainShop() {
+                if (shopItems.length === 0) {
+                    marketShopList.innerHTML = '<div style="color:#999; padding:4px;">店铺空空，下次再来</div>';
+                    return;
+                }
+                let html = '';
+                shopItems.forEach((item, index) => {
+                    html += `
+                        <div class="shop-item" data-index="${index}">
+                            <div class="shop-item-info">
+                                <span>${item.name}</span>
+                                <span>单价: ${item.price} 金币</span>
+                                <span>剩余: ${item.quantity}</span>
+                            </div>
+                            <button class="buy-btn" data-index="${index}" ${item.quantity <= 0 ? 'disabled' : ''}>购买</button>
+                        </div>
+                    `;
+                });
+                marketShopList.innerHTML = html;
+
+                document.querySelectorAll('#marketShopList .buy-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const index = e.target.dataset.index;
+                        const item = shopItems[index];
+                        if (!item || item.quantity <= 0) return;
+                        if (coins < item.price) {
+                            alert('金币不足');
+                            return;
+                        }
+                        if (!canAddItem(item.type, 1)) {
+                            alert('背包空间不足');
+                            return;
+                        }
+                        coins -= item.price;
+                        addResource(item.type, 1);
+                        item.quantity--;
+                        if (item.quantity <= 0) {
+                            shopItems.splice(index, 1);
+                        }
+                        updateUI();
+                        renderMainShop();
+                        addLog(`从集市购买了1个${item.name}`);
+                        autoSave();
+                    });
+                });
+            }
+
+            // ---------- 资源与背包 ----------
+            let bugs = 0;
+            let coins = 0;
+            let leaves = 0;
+            let skewers = 0;
+            let purses = 0;
+            let piggyBanks = 0;
+            let usedLeaves = 0;
+            let backpackUpgradeCount = 0;
+            let backpackCapacity = 10;
+
+            const MAX_BUGS = 5000;
+            const MAX_COINS = 1000;
+            const MAX_LEAVES = 200;
+            const MAX_SKEWERS = 100;
+
+            // ---------- 成就系统函数 ----------
+            function hasEnoughItemsForAchievement(achievement) {
+                if (achievement.itemType === 'mixed') {
+                    if (achievement.id === 'pond_5') {
+                        return bugs >= 50 && skewers >= 10;
+                    }
+                    return false;
+                }
+                let currentCount = 0;
+                if (achievement.itemType === 'bug') currentCount = bugs;
+                else if (achievement.itemType === 'leaf') currentCount = leaves;
+                else if (achievement.itemType === 'skewer') currentCount = skewers;
+                return currentCount >= achievement.count;
+            }
+            
+            function submitAchievement(achievementId) {
+                const achievements = regionAchievements[currentRegion] || [];
+                const achievement = achievements.find(a => a.id === achievementId);
+                if (!achievement) return;
+                
+                if (achievement.itemType === 'mixed') {
+                    if (achievement.id === 'pond_5') {
+                        bugs -= 50;
+                        skewers -= 10;
+                    }
+                } else {
+                    if (achievement.itemType === 'bug') bugs -= achievement.count;
+                    else if (achievement.itemType === 'leaf') leaves -= achievement.count;
+                    else if (achievement.itemType === 'skewer') skewers -= achievement.count;
+                }
+                
+                coins = Math.min(coins + achievement.rewardCoins, MAX_COINS);
+                if (achievement.rewardItems) {
+                    achievement.rewardItems.forEach(item => {
+                        if (item.name === '荷叶') leaves += item.count;
+                        else if (item.name === '荷包') purses += item.count;
+                        else if (item.name === '小存钱罐') piggyBanks += item.count;
+                    });
+                }
+                
+                completedAchievements.push(achievementId);
+                addLog(`完成成就「${achievement.name}」，获得${achievement.rewardCoins}金币奖励！`);
+                updateUI();
+                renderAchievements();
+                autoSave();
+            }
+            
+            function renderAchievements() {
+                const achievements = regionAchievements[currentRegion] || [];
+                const completedCount = achievements.filter(a => completedAchievements.includes(a.id)).length;
+                document.getElementById('achievementRegionTitle').textContent = `🏆 ${currentRegion}地区成就`;
+                document.getElementById('achievementProgress').textContent = `${completedCount}/${achievements.length}`;
+                
+                if (achievements.length === 0) {
+                    achievementList.innerHTML = '<div style="color:#999; padding:4px;">该地区暂无成就</div>';
+                    return;
+                }
+                
+                let html = '';
+                achievements.forEach((achievement, index) => {
+                    const isCompleted = completedAchievements.includes(achievement.id);
+                    const isLocked = index > 0 && !completedAchievements.includes(achievements[index - 1].id);
+                    
+                    let statusClass = isCompleted ? 'completed' : (isLocked ? 'locked' : 'pending');
+                    let statusText = isCompleted ? '已完成' : (isLocked ? '未解锁' : '可提交');
+                    let itemClass = isCompleted ? 'completed' : (isLocked ? 'locked' : '');
+                    
+                    let rewardText = `奖励: ${achievement.rewardCoins}金币`;
+                    if (achievement.rewardItems && achievement.rewardItems.length > 0) {
+                        achievement.rewardItems.forEach(item => {
+                            rewardText += ` +${item.count}${item.name}`;
+                        });
+                    }
+                    
+                    let canSubmit = !isCompleted && !isLocked && hasEnoughItemsForAchievement(achievement);
+                    
+                    html += `
+                        <div class="achievement-item ${itemClass}">
+                            <div class="achievement-header">
+                                <span class="achievement-name">${achievement.name}</span>
+                                <span class="achievement-status ${statusClass}">${statusText}</span>
+                            </div>
+                            <div class="achievement-desc">${achievement.desc}</div>
+                            <div class="achievement-reward">${rewardText}</div>
+                            ${!isCompleted && !isLocked ? `<button class="achievement-submit-btn" data-id="${achievement.id}" ${!canSubmit ? 'disabled' : ''}>${canSubmit ? '提交物品完成' : '物品不足'}</button>` : ''}
+                            ${isCompleted ? '<span class="achievement-completed-icon">✓ 已完成</span>' : ''}
+                        </div>
+                    `;
+                });
+                achievementList.innerHTML = html;
+                
+                document.querySelectorAll('.achievement-submit-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const achievementId = e.target.dataset.id;
+                        submitAchievement(achievementId);
+                    });
+                });
+            }
+
+            // 计算下一次升级所需荷包数量（消耗数）
+            function getNextPurseUpgradeCost() {
+                return 2 * backpackUpgradeCount + 1;
+            }
+
+            // 计算下一次升级所需荷叶数量（消耗数）
+            function getNextLeafUpgradeCost() {
+                return 2 * usedLeaves + 1;
+            }
+
+            function getItemCapacity(name) {
+                const item = marketItems.find(m => m.name === name);
+                return item ? item.capacity : 1;
+            }
+
+            function canAddItem(type, amount) {
+                let newBugs = bugs;
+                let newLeaves = leaves;
+                let newSkewers = skewers;
+                let newPurses = purses;
+                let newPiggyBanks = piggyBanks;
+                if (type === 'bug') newBugs += amount;
+                else if (type === 'leaf') newLeaves += amount;
+                else if (type === 'skewer') newSkewers += amount;
+                else if (type === 'purse') newPurses += amount;
+                else if (type === 'piggyBank') newPiggyBanks += amount;
+
+                let bugSlots = 0;
+                if (newBugs > 0) {
+                    const bugCap = getItemCapacity('虫子');
+                    bugSlots = Math.ceil(newBugs / bugCap);
+                }
+                let leafSlots = newLeaves;
+                let skewerSlots = 0;
+                if (newSkewers > 0) {
+                    const skewerCap = getItemCapacity('虫子串');
+                    skewerSlots = Math.ceil(newSkewers / skewerCap);
+                }
+                let purseSlots = newPurses;
+                let piggyBankSlots = newPiggyBanks;
+                return (bugSlots + leafSlots + skewerSlots + purseSlots + piggyBankSlots) <= backpackCapacity;
+            }
+
+            // 渲染左侧背包
+            function renderBackpack() {
+                let slots = [];
+                // 虫子
+                if (bugs > 0) {
+                    const bugCap = getItemCapacity('虫子');
+                    let remaining = bugs;
+                    while (remaining > 0) {
+                        let count = Math.min(remaining, bugCap);
+                        slots.push({ type: 'bug', count: count });
+                        remaining -= count;
+                    }
+                }
+                // 荷叶
+                for (let i = 0; i < leaves; i++) {
+                    slots.push({ type: 'leaf', count: 1 });
+                }
+                // 虫子串
+                if (skewers > 0) {
+                    const skewerCap = getItemCapacity('虫子串');
+                    let remaining = skewers;
+                    while (remaining > 0) {
+                        let count = Math.min(remaining, skewerCap);
+                        slots.push({ type: 'skewer', count: count });
+                        remaining -= count;
+                    }
+                }
+                // 荷包
+                for (let i = 0; i < purses; i++) {
+                    slots.push({ type: 'purse', count: 1 });
+                }
+                // 小存钱罐
+                for (let i = 0; i < piggyBanks; i++) {
+                    slots.push({ type: 'piggyBank', count: 1 });
+                }
+
+                backpackUsedSpan.textContent = slots.length;
+                backpackCapacitySpan.textContent = backpackCapacity;
+
+                let html = '';
+                slots.forEach((slot, index) => {
+                    let typeName = '';
+                    if (slot.type === 'bug') typeName = '虫子';
+                    else if (slot.type === 'leaf') typeName = '荷叶';
+                    else if (slot.type === 'skewer') typeName = '虫子串';
+                    else if (slot.type === 'purse') typeName = '荷包';
+                    else if (slot.type === 'piggyBank') typeName = '小存钱罐';
+                    let useButton = '';
+                    if (slot.type === 'leaf') {
+                        useButton = `<button class="use-btn" data-index="${index}" data-type="leaf">使用</button>`;
+                    } else if (slot.type === 'purse') {
+                        useButton = `<button class="use-btn" data-index="${index}" data-type="purse">使用</button>`;
+                    } else if (slot.type === 'piggyBank') {
+                        useButton = `<button class="use-btn" data-index="${index}" data-type="piggyBank">使用</button>`;
+                    }
+                    html += `
+                        <div class="backpack-slot" data-slot-index="${index}">
+                            <div class="slot-info">
+                                <span>${typeName}</span>
+                                <span>${slot.count}</span>
+                            </div>
+                            ${useButton}
+                        </div>
+                    `;
+                });
+                backpackGrid.innerHTML = html;
+
+                // 为使用按钮绑定事件
+                document.querySelectorAll('.use-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const type = e.target.dataset.type;
+                        if (type === 'leaf') {
+                            // 荷叶升级摊位：消耗指定数量荷叶
+                            const nextCost = getNextLeafUpgradeCost();
+                            if (leaves < nextCost) {
+                                alert(`升级需要 ${nextCost} 片荷叶，当前只有 ${leaves} 片，无法升级`);
+                                return;
+                            }
+                            leaves -= nextCost;
+                            usedLeaves++;
+                            addLog(`使用了${nextCost}个荷叶，摊位上限+1`);
+                            updateUI();
+                            autoSave();
+                        } else if (type === 'purse') {
+                            // 荷包升级背包
+                            const nextCost = getNextPurseUpgradeCost();
+                            if (purses < nextCost) {
+                                alert(`升级背包需要 ${nextCost} 个荷包，当前只有 ${purses} 个`);
+                                return;
+                            }
+                            purses -= nextCost;
+                            backpackUpgradeCount++;
+                            backpackCapacity++;
+                            addLog(`使用了${nextCost}个荷包，背包容量+1`);
+                            updateUI();
+                            autoSave();
+                        } else if (type === 'piggyBank') {
+                            // 小存钱罐：使用后获得500金币
+                            if (piggyBanks < 1) {
+                                alert('没有小存钱罐可用');
+                                return;
+                            }
+                            piggyBanks--;
+                            const gained = Math.min(500, MAX_COINS - coins);
+                            coins += gained;
+                            addLog(`使用小存钱罐，获得${gained}金币`);
+                            updateUI();
+                            autoSave();
+                        }
+                    });
+                });
+            }
+
+            // 渲染主区域可摆摊背包（只显示可上架物品：虫子、荷叶、虫子串）
+            function renderStallBackpack() {
+                let slots = [];
+                if (bugs > 0) {
+                    const bugCap = getItemCapacity('虫子');
+                    let remaining = bugs;
+                    while (remaining > 0) {
+                        let count = Math.min(remaining, bugCap);
+                        slots.push({ type: 'bug', count: count });
+                        remaining -= count;
+                    }
+                }
+                for (let i = 0; i < leaves; i++) {
+                    slots.push({ type: 'leaf', count: 1 });
+                }
+                if (skewers > 0) {
+                    const skewerCap = getItemCapacity('虫子串');
+                    let remaining = skewers;
+                    while (remaining > 0) {
+                        let count = Math.min(remaining, skewerCap);
+                        slots.push({ type: 'skewer', count: count });
+                        remaining -= count;
+                    }
+                }
+
+                let html = '';
+                slots.forEach((slot, index) => {
+                    let typeName = '';
+                    if (slot.type === 'bug') typeName = '虫子';
+                    else if (slot.type === 'leaf') typeName = '荷叶';
+                    else if (slot.type === 'skewer') typeName = '虫子串';
+                    html += `
+                        <div class="backpack-main-slot" data-slot-type="${slot.type}" data-slot-count="${slot.count}">
+                            <span>${typeName}</span>
+                            <span>${slot.count}</span>
+                        </div>
+                    `;
+                });
+                stallBackpackGrid.innerHTML = html;
+
+                document.querySelectorAll('.backpack-main-slot').forEach(el => {
+                    el.addEventListener('click', (e) => {
+                        const type = el.dataset.slotType;
+                        const slotCount = parseInt(el.dataset.slotCount, 10);
+                        let total = 0;
+                        if (type === 'bug') total = bugs;
+                        else if (type === 'leaf') total = leaves;
+                        else if (type === 'skewer') total = skewers;
+                        if (total <= 0) return;
+                        openStallModalForItem(type, slotCount, total);
+                    });
+                });
+            }
+
+            // 打开出摊模态框，并预选物品类型、默认数量，售价默认市场价
+            function openStallModalForItem(type, defaultQty, maxQty) {
+                const options = [];
+                let marketPrice = 1;
+                if (type === 'bug') {
+                    const marketItem = marketItems.find(m => m.name === '虫子');
+                    marketPrice = marketItem ? marketItem.currentPrice : 1;
+                    options.push({ value: 'bug', text: `虫子 (${bugs})`, marketPrice: marketPrice });
+                } else if (type === 'leaf') {
+                    const marketItem = marketItems.find(m => m.name === '荷叶');
+                    marketPrice = marketItem ? marketItem.currentPrice : 2;
+                    options.push({ value: 'leaf', text: `荷叶 (${leaves})`, marketPrice: marketPrice });
+                } else if (type === 'skewer') {
+                    const marketItem = marketItems.find(m => m.name === '虫子串');
+                    marketPrice = marketItem ? marketItem.currentPrice : 5;
+                    options.push({ value: 'skewer', text: `虫子串 (${skewers})`, marketPrice: marketPrice });
+                }
+
+                if (options.length === 0) return;
+
+                itemSelect.innerHTML = '';
+                options.forEach(opt => {
+                    const option = document.createElement('option');
+                    option.value = opt.value;
+                    option.textContent = opt.text;
+                    option.dataset.marketPrice = opt.marketPrice;
+                    itemSelect.appendChild(option);
+                });
+
+                itemPrice.value = options[0].marketPrice;
+                itemQuantity.max = maxQty;
+                itemQuantity.value = Math.min(defaultQty, maxQty);
+                itemQuantity.min = 1;
+
+                modal.style.display = 'block';
+            }
+
+            let stallItems = [];
+
+            function getMaxStalls() {
+                return 5 + usedLeaves;
+            }
+
+            function updateStallTabLabel() {
+                const maxStalls = getMaxStalls();
+                stallTabCount.textContent = `${stallItems.length}/${maxStalls}`;
+                const nextLeafCost = getNextLeafUpgradeCost();
+                upgradeCostDisplay.textContent = `升级需${nextLeafCost}荷叶`;
+            }
+
+            function addResource(type, amount) {
+                if (type === 'bug') {
+                    bugs = Math.min(bugs + amount, MAX_BUGS);
+                } else if (type === 'leaf') {
+                    leaves = Math.min(leaves + amount, MAX_LEAVES);
+                } else if (type === 'skewer') {
+                    skewers = Math.min(skewers + amount, MAX_SKEWERS);
+                } else if (type === 'purse') {
+                    purses += amount;
+                } else if (type === 'piggyBank') {
+                    piggyBanks += amount;
+                }
+            }
+
+            function updateUI() {
+                coinSpan.textContent = coins;
+
+                if (bugs >= 10 && skewers < MAX_SKEWERS) {
+                    skewerBtn.disabled = false;
+                    skewerBtn.classList.remove('disabled');
+                } else {
+                    skewerBtn.disabled = true;
+                    skewerBtn.classList.add('disabled');
+                }
+
+                renderStall();
+                renderBackpack();
+                renderStallBackpack();
+                updateStallTabLabel();
+
+                const nextPurseCost = getNextPurseUpgradeCost();
+                backpackHeader.title = `升级需${nextPurseCost}荷包`;
+            }
+
+            function renderStall() {
+                if (stallItems.length === 0) {
+                    stallList.innerHTML = '<div style="color:#999; padding:4px;">摊位空空，快上架吧</div>';
+                    return;
+                }
+                let html = '';
+                stallItems.forEach((item, index) => {
+                    let typeName = '';
+                    if (item.type === 'bug') typeName = '虫子';
+                    else if (item.type === 'leaf') typeName = '荷叶';
+                    else if (item.type === 'skewer') typeName = '虫子串';
+
+                    const remainingSeconds = item.timeRemaining.toFixed(2);
+                    html += `
+                        <div class="stall-item" data-index="${index}">
+                            <div class="stall-info">
+                                <span>${typeName}</span>
+                                <span>${item.remaining}/${item.total}</span>
+                                <span>售价:${item.customPrice}</span>
+                                <span>市场价:${item.basePrice}</span>
+                                <span>⏳ ${remainingSeconds}秒</span>
+                            </div>
+                            <button class="remove-stall-btn" data-index="${index}">下架</button>
+                        </div>
+                    `;
+                });
+                stallList.innerHTML = html;
+            }
+
+            function removeStallItem(index) {
+                const item = stallItems[index];
+                if (!item) return;
+                if (!canAddItem(item.type, item.remaining)) {
+                    alert('背包空间不足，无法下架！');
+                    return;
+                }
+                addResource(item.type, item.remaining);
+                stallItems.splice(index, 1);
+                addLog(`下架了${item.remaining}个${item.type === 'bug' ? '虫子' : (item.type === 'leaf' ? '荷叶' : '虫子串')}`);
+                updateUI();
+                autoSave();
+            }
+
+            function clearAllStalls() {
+                let totalBugs = 0, totalLeaves = 0, totalSkewers = 0;
+                stallItems.forEach(item => {
+                    if (item.type === 'bug') totalBugs += item.remaining;
+                    else if (item.type === 'leaf') totalLeaves += item.remaining;
+                    else if (item.type === 'skewer') totalSkewers += item.remaining;
+                });
+                let newBugs = bugs + totalBugs;
+                let newLeaves = leaves + totalLeaves;
+                let newSkewers = skewers + totalSkewers;
+
+                const bugCap = getItemCapacity('虫子');
+                const skewerCap = getItemCapacity('虫子串');
+                let bugSlots = newBugs > 0 ? Math.ceil(newBugs / bugCap) : 0;
+                let leafSlots = newLeaves;
+                let skewerSlots = newSkewers > 0 ? Math.ceil(newSkewers / skewerCap) : 0;
+                if (bugSlots + leafSlots + skewerSlots + purses + piggyBanks > backpackCapacity) {
+                    alert('背包空间不足，无法全部下架！');
+                    return;
+                }
+                for (let i = stallItems.length - 1; i >= 0; i--) {
+                    const item = stallItems[i];
+                    addResource(item.type, item.remaining);
+                }
+                stallItems = [];
+                addLog('收摊：全部下架');
+                updateUI();
+                autoSave();
+            }
+
+            stallList.addEventListener('click', (e) => {
+                if (e.target.classList.contains('remove-stall-btn')) {
+                    const index = e.target.getAttribute('data-index');
+                    if (index !== null) {
+                        removeStallItem(parseInt(index, 10));
+                    }
+                }
+            });
+
+            document.getElementById('clearStallBtn').addEventListener('click', () => {
+                if (stallItems.length === 0) return;
+                clearAllStalls();
+            });
+
+            catchBtn.addEventListener('click', function() {
+                if (bugs >= MAX_BUGS) {
+                    alert('虫子已达上限');
+                    return;
+                }
+                if (!canAddItem('bug', 1)) {
+                    alert('背包已满！');
+                    return;
+                }
+                bugs++;
+                addLog('捕捉了1只虫子');
+                updateUI();
+                autoSave();
+            });
+
+            skewerBtn.addEventListener('click', function() {
+                if (bugs < 10) return;
+                if (skewers >= MAX_SKEWERS) {
+                    alert('虫子串已达上限');
+                    return;
+                }
+                let newBugs = bugs - 10;
+                let newSkewers = skewers + 1;
+                const bugCap = getItemCapacity('虫子');
+                const skewerCap = getItemCapacity('虫子串');
+                let bugSlots = newBugs > 0 ? Math.ceil(newBugs / bugCap) : 0;
+                let leafSlots = leaves;
+                let skewerSlots = newSkewers > 0 ? Math.ceil(newSkewers / skewerCap) : 0;
+                if (bugSlots + leafSlots + skewerSlots + purses + piggyBanks > backpackCapacity) {
+                    alert('背包空间不足，无法串成串！');
+                    return;
+                }
+                bugs -= 10;
+                skewers++;
+                addLog('将10只虫子串成1个虫子串');
+                updateUI();
+                autoSave();
+            });
+
+            stallBtn.addEventListener('click', function() {
+                const options = [];
+                if (bugs > 0) {
+                    const marketItem = marketItems.find(m => m.name === '虫子');
+                    options.push({ value: 'bug', text: `虫子 (${bugs})`, marketPrice: marketItem ? marketItem.currentPrice : 1 });
+                }
+                if (leaves > 0) {
+                    const marketItem = marketItems.find(m => m.name === '荷叶');
+                    options.push({ value: 'leaf', text: `荷叶 (${leaves})`, marketPrice: marketItem ? marketItem.currentPrice : 2 });
+                }
+                if (skewers > 0) {
+                    const marketItem = marketItems.find(m => m.name === '虫子串');
+                    options.push({ value: 'skewer', text: `虫子串 (${skewers})`, marketPrice: marketItem ? marketItem.currentPrice : 5 });
+                }
+
+                if (options.length === 0) {
+                    alert('没有可上架的物品');
+                    return;
+                }
+
+                itemSelect.innerHTML = '';
+                options.forEach(opt => {
+                    const option = document.createElement('option');
+                    option.value = opt.value;
+                    option.textContent = opt.text;
+                    option.dataset.marketPrice = opt.marketPrice;
+                    itemSelect.appendChild(option);
+                });
+
+                itemPrice.value = options[0].marketPrice;
+
+                const selected = itemSelect.value;
+                let maxQty = 0;
+                if (selected === 'bug') maxQty = bugs;
+                else if (selected === 'leaf') maxQty = leaves;
+                else if (selected === 'skewer') maxQty = skewers;
+                itemQuantity.max = maxQty;
+                itemQuantity.value = maxQty;
+                itemQuantity.min = 1;
+
+                itemSelect.onchange = function() {
+                    const newSelected = itemSelect.value;
+                    const marketPrice = parseFloat(itemSelect.selectedOptions[0]?.dataset.marketPrice || 1);
+                    itemPrice.value = marketPrice;
+                    let newMax = 0;
+                    if (newSelected === 'bug') newMax = bugs;
+                    else if (newSelected === 'leaf') newMax = leaves;
+                    else if (newSelected === 'skewer') newMax = skewers;
+                    itemQuantity.max = newMax;
+                    itemQuantity.value = newMax;
+                };
+
+                modal.style.display = 'block';
+            });
+
+            modalCancel.addEventListener('click', function() {
+                modal.style.display = 'none';
+            });
+
+            modalConfirm.addEventListener('click', function() {
+                const selected = itemSelect.value;
+                let qty = parseInt(itemQuantity.value, 10);
+                const customPrice = parseInt(itemPrice.value, 10);
+
+                if (isNaN(qty) || qty <= 0) {
+                    alert('请输入有效数量');
+                    return;
+                }
+                if (isNaN(customPrice) || customPrice <= 0) {
+                    alert('售价必须为正整数');
+                    return;
+                }
+
+                let available = 0;
+                if (selected === 'bug') available = bugs;
+                else if (selected === 'leaf') available = leaves;
+                else if (selected === 'skewer') available = skewers;
+
+                if (qty > available) {
+                    alert('数量不足');
+                    return;
+                }
+
+                const maxStalls = getMaxStalls();
+                if (stallItems.length >= maxStalls) {
+                    alert(`摊位已满 (${stallItems.length}/${maxStalls})，无法上架新物品`);
+                    return;
+                }
+
+                if (selected === 'bug') {
+                    bugs -= qty;
+                } else if (selected === 'leaf') {
+                    leaves -= qty;
+                } else if (selected === 'skewer') {
+                    skewers -= qty;
+                }
+
+                const typeToName = { bug: '虫子', leaf: '荷叶', skewer: '虫子串' };
+                const itemName = typeToName[selected];
+                const marketItem = marketItems.find(m => m.name === itemName);
+                const basePrice = marketItem ? marketItem.currentPrice : 1;
+                const baseSpeed = marketItem ? marketItem.baseSpeed : 5;
+                const meanTime = baseSpeed * (customPrice / basePrice);
+
+                const firstTime = generateSaleTime(meanTime);
+
+                stallItems.push({
+                    type: selected,
+                    remaining: qty,
+                    total: qty,
+                    basePrice: basePrice,
+                    customPrice: customPrice,
+                    baseSpeed: baseSpeed,
+                    meanTime: meanTime,
+                    timeRemaining: firstTime
+                });
+
+                addLog(`上架了${qty}个${itemName}，售价${customPrice}金币`);
+                updateUI();
+                modal.style.display = 'none';
+                autoSave();
+            });
+
+            window.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+
+            // 销售定时器：每秒触发，减少 timeRemaining，当 <=0 时售出一个，并生成下一个
+            setInterval(function() {
+                if (stallItems.length === 0) return;
+
+                let changed = false;
+                for (let i = stallItems.length - 1; i >= 0; i--) {
+                    const item = stallItems[i];
+                    item.timeRemaining -= 1;
+
+                    while (item.timeRemaining <= 0) {
+                        item.remaining -= 1;
+                        
+                        // 计算税收和实际收入
+                        const tax = calculateTax(item.customPrice);
+                        const actualIncome = item.customPrice - tax;
+                        coins = Math.min(coins + actualIncome, MAX_COINS);
+
+                        let typeName = '';
+                        if (item.type === 'bug') typeName = '虫子';
+                        else if (item.type === 'leaf') typeName = '荷叶';
+                        else if (item.type === 'skewer') typeName = '虫子串';
+                        
+                        if (tax > 0) {
+                            addLog(`售出1个${typeName}，收入${actualIncome}金币（税${tax}）`);
+                        } else {
+                            addLog(`售出1个${typeName}，收入${actualIncome}金币（免税）`);
+                        }
+
+                        if (item.remaining <= 0) {
+                            stallItems.splice(i, 1);
+                            changed = true;
+                            break;
+                        } else {
+                            item.timeRemaining += generateSaleTime(item.meanTime);
+                        }
+                    }
+                    if (item.remaining > 0) {
+                        changed = true;
+                    }
+                }
+                if (changed) {
+                    updateUI();
+                    autoSave();
+                }
+            }, 1000);
+
+            // 标签页切换（右侧）
+            function setActiveTab(activeBtn, activePane) {
+                [logTabBtn, stallTabBtn, marketTabBtn, achievementTabBtn].forEach(btn => btn.classList.remove('active'));
+                [logPane, stallPane, marketPane, achievementPane].forEach(pane => {
+                    pane.classList.remove('active');
+                    pane.style.display = '';
+                });
+                activeBtn.classList.add('active');
+                activePane.classList.add('active');
+            }
+
+            logTabBtn.addEventListener('click', function() {
+                setActiveTab(logTabBtn, logPane);
+            });
+            stallTabBtn.addEventListener('click', function() {
+                setActiveTab(stallTabBtn, stallPane);
+            });
+            marketTabBtn.addEventListener('click', function() {
+                setActiveTab(marketTabBtn, marketPane);
+            });
+            achievementTabBtn.addEventListener('click', function() {
+                setActiveTab(achievementTabBtn, achievementPane);
+                renderAchievements();
+            });
+
+            // 主 tab-bar 链接事件
+            function hideAllMainPanes() {
+                mainButtonGroup.style.display = 'flex';
+                stallBackpackPane.style.display = 'none';
+                marketShopPane.style.display = 'none';
+                hotelPane.style.display = 'none';
+            }
+
+            tabAll.addEventListener('click', (e) => { e.preventDefault(); hideAllMainPanes(); });
+            tabProcess.addEventListener('click', (e) => { e.preventDefault(); hideAllMainPanes(); });
+            tabCollect.addEventListener('click', (e) => { e.preventDefault(); hideAllMainPanes(); });
+
+            tabStall.addEventListener('click', (e) => {
+                e.preventDefault();
+                mainButtonGroup.style.display = 'none';
+                marketShopPane.style.display = 'none';
+                hotelPane.style.display = 'none';
+                stallBackpackPane.style.display = 'block';
+                renderStallBackpack();
+            });
+
+            tabMarketShop.addEventListener('click', (e) => {
+                e.preventDefault();
+                mainButtonGroup.style.display = 'none';
+                stallBackpackPane.style.display = 'none';
+                hotelPane.style.display = 'none';
+                marketShopPane.style.display = 'block';
+                renderMainShop();
+            });
+
+            // 旅馆标签
+            tabHotel.addEventListener('click', (e) => {
+                e.preventDefault();
+                mainButtonGroup.style.display = 'none';
+                stallBackpackPane.style.display = 'none';
+                marketShopPane.style.display = 'none';
+                hotelPane.style.display = 'block';
+            });
+
+            setActiveTab(stallTabBtn, stallPane);
+
+            // ---------- 旅馆功能 ----------
+            hotelStayBtn.addEventListener('click', () => {
+                if (coins < 100) {
+                    alert('金币不足 100，无法住宿');
+                    return;
+                }
+                coins -= 100;
+                addLog('花费100金币在旅馆住宿一晚');
+
+                // 计算当前总天数
+                const now = Date.now();
+                const elapsedHours = (now - startTimestamp) / 3600000;
+                const totalDays = initialDays + elapsedHours;
+                // 当前日期的整数部分（即当天开始的整数天数，对应早上8点）
+                const currentDayInt = Math.floor(totalDays);
+                // 第二天早上8点对应 currentDayInt + 1
+                const targetDay = currentDayInt + 1;
+                // 设置 initialDays 为目标整数天数，并重置 startTimestamp 为现在
+                initialDays = targetDay;
+                startTimestamp = Date.now();
+                // 更新 lastDayNumber 为新的整数天数
+                lastDayNumber = targetDay + 1; // 因为 currentDayNumber = floor(totalDays)+1，这里 targetDay+1 是新的日期数字
+                // 立即更新时间显示
+                updateGameTime();
+                // 手动触发市场波动和集市刷新
+                fluctuatePrices();
+                refreshShop();
+                updateUI();
+                autoSave();
+            });
+
+            // ---------- 删档功能 ----------
+            document.getElementById('deleteSaveLink').addEventListener('click', function(e) {
+                e.preventDefault();
+                if (confirm('确定要删除所有存档数据并恢复初始状态吗？')) {
+                    localStorage.removeItem('frogStallSave');
+                    location.reload();
+                }
+            });
+
+            // ---------- 存档/读档链接 ----------
+            const saveGameLink = document.getElementById('saveGameLink');
+            const loadGameLink = document.getElementById('loadGameLink');
+            const exportBtn = document.getElementById('exportGameBtn');
+            const importFile = document.getElementById('importFile');
+
+            saveGameLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (exportBtn) exportBtn.click();
+            });
+
+            loadGameLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (importFile) importFile.click();
+            });
+
+            // ---------- 开发者面板 ----------
+            const devLink = document.getElementById('devLink');
+            const devPanel = document.getElementById('devPanel');
+            const closeDevPanel = document.getElementById('closeDevPanel');
+            const globalVolatilityInput = document.getElementById('globalVolatility');
+            const setVolatilityBtn = document.getElementById('setVolatilityBtn');
+            const newItemName = document.getElementById('newItemName');
+            const newItemMin = document.getElementById('newItemMin');
+            const newItemMax = document.getElementById('newItemMax');
+            const newItemPrice = document.getElementById('newItemPrice');
+            const newItemVolatility = document.getElementById('newItemVolatility');
+            const newItemSpeed = document.getElementById('newItemSpeed');
+            const newItemCapacity = document.getElementById('newItemCapacity');
+            const addItemBtn = document.getElementById('addItemBtn');
+            const devItemList = document.getElementById('devItemList');
+            const devAddCoins = document.getElementById('devAddCoins');
+            const devAddCoinsBtn = document.getElementById('devAddCoinsBtn');
+            const devSetCoins = document.getElementById('devSetCoins');
+            const devSetCoinsBtn = document.getElementById('devSetCoinsBtn');
+            const saveStatus = document.getElementById('saveStatus');
+            // 新元素
+            const nextDayBtn = document.getElementById('nextDayBtn');
+            const devItemName = document.getElementById('devItemName');
+            const devItemQty = document.getElementById('devItemQty');
+            const addToBackpackBtn = document.getElementById('addToBackpackBtn');
+
+            // 次日按钮
+            nextDayBtn.addEventListener('click', () => {
+                // 获取当前总天数，增加1天
+                const now = Date.now();
+                const elapsedHours = (now - startTimestamp) / 3600000;
+                const totalDays = initialDays + elapsedHours;
+                const currentDayNumber = Math.floor(totalDays) + 1;
+                // 设置新的初始天数，使当前日期变为 currentDayNumber + 1
+                const newTotalDays = currentDayNumber; // 明天的整数天
+                initialDays = newTotalDays;
+                startTimestamp = Date.now();
+                lastDayNumber = newTotalDays;
+                updateGameTime();
+                fluctuatePrices();
+                refreshShop();
+                addLog('开发者跳转到次日');
+                autoSave();
+            });
+
+            // 添加到背包
+            addToBackpackBtn.addEventListener('click', () => {
+                const name = devItemName.value.trim();
+                const qty = parseInt(devItemQty.value);
+                if (!name) { alert('请输入物品名称'); return; }
+                if (isNaN(qty) || qty <= 0) { alert('数量必须为正整数'); return; }
+                // 根据名称匹配类型
+                let type = null;
+                if (name === '虫子') type = 'bug';
+                else if (name === '荷叶') type = 'leaf';
+                else if (name === '虫子串') type = 'skewer';
+                else if (name === '荷包') type = 'purse';
+                else if (name === '小存钱罐') type = 'piggyBank';
+                else {
+                    alert('只支持添加虫子、荷叶、虫子串、荷包、小存钱罐');
+                    return;
+                }
+                // 直接添加，不检查背包容量（开发者模式）
+                if (type === 'bug') bugs += qty;
+                else if (type === 'leaf') leaves += qty;
+                else if (type === 'skewer') skewers += qty;
+                else if (type === 'purse') purses += qty;
+                else if (type === 'piggyBank') piggyBanks += qty;
+                addLog(`开发者添加了${qty}个${name}`);
+                updateUI();
+                autoSave();
+                devItemName.value = '';
+                devItemQty.value = 1;
+            });
+
+            devAddCoinsBtn.addEventListener('click', () => {
+                let amount = parseInt(devAddCoins.value);
+                if (isNaN(amount) || amount < 1) amount = 1;
+                coins = Math.min(coins + amount, MAX_COINS);
+                addLog(`开发者增加了${amount}金币`);
+                updateUI();
+                autoSave();
+                saveStatus.textContent = '金币已增加';
+                setTimeout(() => saveStatus.textContent = '', 2000);
+            });
+            devSetCoinsBtn.addEventListener('click', () => {
+                let amount = parseInt(devSetCoins.value);
+                if (isNaN(amount) || amount < 0) amount = 0;
+                coins = Math.min(amount, MAX_COINS);
+                addLog(`开发者设置金币为${amount}`);
+                updateUI();
+                autoSave();
+                saveStatus.textContent = '金币已设置';
+                setTimeout(() => saveStatus.textContent = '', 2000);
+            });
+
+            function autoSave() {
+                localStorage.setItem('frogStallSave', JSON.stringify(getSaveData()));
+            }
+            function getSaveData() {
+                return {
+                    bugs, coins, leaves, skewers, purses, piggyBanks,
+                    usedLeaves,
+                    backpackUpgradeCount,
+                    backpackCapacity,
+                    stallItems,
+                    marketItems,
+                    shopItems,
+                    globalVolatility,
+                    initialDays,
+                    startTimestamp,
+                    lastDayNumber,
+                    currentRegion,
+                    completedAchievements
+                };
+            }
+            function loadSaveData(data) {
+                bugs = data.bugs || 0;
+                coins = data.coins || 0;
+                leaves = data.leaves || 0;
+                skewers = data.skewers || 0;
+                purses = data.purses || 0;
+                piggyBanks = data.piggyBanks || 0;
+                usedLeaves = data.usedLeaves || 0;
+                backpackUpgradeCount = data.backpackUpgradeCount || 0;
+                backpackCapacity = data.backpackCapacity || 10;
+                stallItems = data.stallItems || [];
+                marketItems = data.marketItems || marketItems;
+                shopItems = data.shopItems || shopItems;
+                globalVolatility = data.globalVolatility !== undefined ? data.globalVolatility : 1;
+                initialDays = data.initialDays !== undefined ? data.initialDays : 4.0;
+                startTimestamp = data.startTimestamp || Date.now();
+                lastDayNumber = data.lastDayNumber || 5;
+                currentRegion = data.currentRegion || '池塘';
+                completedAchievements = data.completedAchievements || [];
+                document.getElementById('regionDisplay').textContent = `地区：${currentRegion}`;
+                renderMarket();
+                renderMainShop();
+                updateUI();
+                updateGameTime();
+                addLog('存档已加载');
+            }
+            document.getElementById('saveGameBtn').addEventListener('click', () => {
+                autoSave();
+                saveStatus.textContent = '已保存到浏览器';
+                addLog('游戏已保存');
+                setTimeout(() => saveStatus.textContent = '', 2000);
+            });
+            document.getElementById('loadGameBtn').addEventListener('click', () => {
+                const saved = localStorage.getItem('frogStallSave');
+                if (saved) {
+                    try {
+                        const data = JSON.parse(saved);
+                        loadSaveData(data);
+                        saveStatus.textContent = '已从浏览器加载';
+                    } catch(e) {
+                        alert('存档损坏');
+                    }
+                } else {
+                    alert('无存档');
+                }
+                setTimeout(() => saveStatus.textContent = '', 2000);
+            });
+            document.getElementById('exportGameBtn').addEventListener('click', () => {
+                const dataStr = JSON.stringify(getSaveData(), null, 2);
+                const blob = new Blob([dataStr], {type: 'application/json'});
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `frog_stall_save_${new Date().toISOString().slice(0,10)}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                addLog('存档已导出');
+                saveStatus.textContent = '存档已导出';
+                setTimeout(() => saveStatus.textContent = '', 2000);
+            });
+            document.getElementById('importGameBtn').addEventListener('click', () => {
+                importFile.click();
+            });
+            importFile.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const data = JSON.parse(event.target.result);
+                        loadSaveData(data);
+                        saveStatus.textContent = '存档已导入';
+                    } catch(e) {
+                        alert('无效的存档文件');
+                    }
+                };
+                reader.readAsText(file);
+                e.target.value = '';
+            });
+
+            devLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                devPanel.style.display = 'flex';
+                refreshDevItemList();
+            });
+            closeDevPanel.addEventListener('click', () => {
+                devPanel.style.display = 'none';
+            });
+            devPanel.addEventListener('click', (e) => {
+                if (e.target === devPanel) {
+                    devPanel.style.display = 'none';
+                }
+            });
+
+            function refreshDevItemList() {
+                let html = '';
+                marketItems.forEach((item, index) => {
+                    html += `
+                        <div class="dev-item-row">
+                            <span>${item.name}</span>
+                            <input type="number" class="dev-min" data-index="${index}" value="${item.minPrice}" style="width:90px;" placeholder="最低">
+                            <input type="number" class="dev-max" data-index="${index}" value="${item.maxPrice}" style="width:90px;" placeholder="最高">
+                            <input type="number" class="dev-price" data-index="${index}" value="${item.currentPrice}" style="width:90px;" placeholder="当前">
+                            <input type="number" class="dev-vol" data-index="${index}" value="${item.volatility}" step="1" min="0" style="width:90px;" placeholder="波动额">
+                            <input type="number" class="dev-speed" data-index="${index}" value="${item.baseSpeed}" min="1" step="1" style="width:90px;" placeholder="速度">
+                            <input type="number" class="dev-cap" data-index="${index}" value="${item.capacity}" min="1" step="1" style="width:90px;" placeholder="容量">
+                            <button class="dev-update" data-index="${index}">更新</button>
+                            <button class="dev-delete" data-index="${index}">删除</button>
+                        </div>
+                    `;
+                });
+                devItemList.innerHTML = html;
+
+                document.querySelectorAll('.dev-update').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const idx = e.target.dataset.index;
+                        const minInput = document.querySelector(`.dev-min[data-index="${idx}"]`);
+                        const maxInput = document.querySelector(`.dev-max[data-index="${idx}"]`);
+                        const priceInput = document.querySelector(`.dev-price[data-index="${idx}"]`);
+                        const volInput = document.querySelector(`.dev-vol[data-index="${idx}"]`);
+                        const speedInput = document.querySelector(`.dev-speed[data-index="${idx}"]`);
+                        const capInput = document.querySelector(`.dev-cap[data-index="${idx}"]`);
+                        const min = parseInt(minInput.value);
+                        const max = parseInt(maxInput.value);
+                        const price = parseInt(priceInput.value);
+                        const vol = parseInt(volInput.value);
+                        const speed = parseInt(speedInput.value);
+                        const cap = parseInt(capInput.value);
+                        if (isNaN(min) || isNaN(max) || isNaN(price) || isNaN(vol) || isNaN(speed) || isNaN(cap) ||
+                            min < 1 || max < min || price < min || price > max || vol < 0 || speed < 1 || cap < 1) {
+                            alert('数值无效');
+                            return;
+                        }
+                        marketItems[idx].minPrice = min;
+                        marketItems[idx].maxPrice = max;
+                        marketItems[idx].currentPrice = price;
+                        marketItems[idx].volatility = vol;
+                        marketItems[idx].baseSpeed = speed;
+                        marketItems[idx].capacity = cap;
+                        renderMarket();
+                        refreshDevItemList();
+                        autoSave();
+                    });
+                });
+
+                document.querySelectorAll('.dev-delete').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const idx = e.target.dataset.index;
+                        if (confirm(`确定删除 ${marketItems[idx].name} 吗？`)) {
+                            marketItems.splice(idx, 1);
+                            renderMarket();
+                            refreshDevItemList();
+                            autoSave();
+                        }
+                    });
+                });
+            }
+
+            setVolatilityBtn.addEventListener('click', () => {
+                let v = parseInt(globalVolatilityInput.value);
+                if (isNaN(v) || v < 0) v = 0;
+                globalVolatility = v;
+                alert(`全局波动金额已设为 ${v}`);
+                autoSave();
+            });
+
+            addItemBtn.addEventListener('click', () => {
+                const name = newItemName.value.trim();
+                const min = parseInt(newItemMin.value);
+                const max = parseInt(newItemMax.value);
+                const price = parseInt(newItemPrice.value);
+                const vol = parseInt(newItemVolatility.value);
+                const speed = parseInt(newItemSpeed.value);
+                const cap = parseInt(newItemCapacity.value);
+                if (!name) { alert('请输入名称'); return; }
+                if (isNaN(min) || min < 1) { alert('最低价必须为正整数'); return; }
+                if (isNaN(max) || max < min) { alert('最高价必须 ≥ 最低价'); return; }
+                if (isNaN(price) || price < min || price > max) { alert('初始价必须在范围内'); return; }
+                if (isNaN(vol) || vol < 0) { alert('波动金额必须为非负整数'); return; }
+                if (isNaN(speed) || speed < 1) { alert('速度必须为正整数'); return; }
+                if (isNaN(cap) || cap < 1) { alert('容量必须为正整数'); return; }
+                marketItems.push({ name, minPrice: min, maxPrice: max, currentPrice: price, volatility: vol, baseSpeed: speed, capacity: cap });
+                renderMarket();
+                refreshDevItemList();
+                newItemName.value = '';
+                newItemMin.value = '';
+                newItemMax.value = '';
+                newItemPrice.value = '';
+                newItemVolatility.value = '';
+                newItemSpeed.value = '';
+                newItemCapacity.value = '1';
+                autoSave();
+            });
+
+            document.getElementById('setTimeBtn').addEventListener('click', () => {
+                const year = parseInt(document.getElementById('setYear').value);
+                const seasonIdx = parseInt(document.getElementById('setSeason').value);
+                const day = parseInt(document.getElementById('setDay').value);
+                const hour = parseInt(document.getElementById('setHour').value);
+                if (isNaN(year) || year < 1) { alert('年份必须≥1'); return; }
+                if (isNaN(day) || day < 1 || day > 4) { alert('日必须1-4'); return; }
+                if (isNaN(hour) || hour < 8 || hour > 20) { alert('小时必须8-20'); return; }
+                const totalDays = (year - 1) * 16 + seasonIdx * 4 + day;
+                const dayFraction = (hour - 8) / 12;
+                initialDays = (totalDays - 1) + dayFraction;
+                startTimestamp = Date.now();
+                lastDayNumber = totalDays;
+                updateGameTime();
+                fluctuatePrices();
+                refreshShop();
+                autoSave();
+                addLog(`开发者将时间设为第${year}年 ${seasonNames[seasonIdx]}季 第${day}天 ${hour}:00`);
+                alert(`时间已设为第${year}年 ${seasonNames[seasonIdx]}季 第${day}天 ${hour}:00`);
+            });
+
+            // 初始化自动加载
+            const saved = localStorage.getItem('frogStallSave');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    loadSaveData(data);
+                } catch(e) {}
+            } else {
+                addLog('游戏开始');
+                updateUI();
+                renderMainShop();
+                renderStallBackpack();
+            }
+
+            // 初始隐藏所有主区域面板
+            stallBackpackPane.style.display = 'none';
+            marketShopPane.style.display = 'none';
+            hotelPane.style.display = 'none';
+            renderLogs();
+            renderAchievements();
+        })();
+    </script>
+</body>
+</html>
