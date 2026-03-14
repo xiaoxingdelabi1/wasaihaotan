@@ -5,6 +5,32 @@
     font-family: "Microsoft YaHei", SimSun, sans-serif;
 }
 
+.transparent-btn {
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    cursor: pointer !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    font-size: 12px;
+    opacity: 1;
+    transition: opacity 0.2s;
+}
+
+.transparent-btn.active {
+    opacity: 1 !important;
+    filter: none !important;
+}
+
+.transparent-btn:hover {
+    opacity: 0.7 !important;
+}
+
+.transparent-btn:active {
+    opacity: 1 !important;
+}
+
 body {
     background-color: #ffffff;
     color: #222222;

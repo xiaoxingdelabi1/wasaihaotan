@@ -202,6 +202,20 @@ const State = {
         
         if (data.character) {
             Object.assign(Character, data.character);
+            if (!Character.equipment) {
+                Character.equipment = {
+                    weapon: null,
+                    armor: null,
+                    helmet: null,
+                    boots: null,
+                    gloves: null,
+                    pants: null,
+                    tool: null
+                };
+            } else {
+                if (!Character.equipment.pants) Character.equipment.pants = null;
+                if (!Character.equipment.tool) Character.equipment.tool = null;
+            }
             Character.calculateStats();
         }
         

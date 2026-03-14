@@ -40,6 +40,8 @@ const RPGUI = {
                 if (equipment[slot]) {
                     const item = equipment[slot];
                     const qualityColor = Equipment.getQualityColor(item.quality);
+                    const refineLevel = item.refineLevel || 0;
+                    const refineDisplay = refineLevel > 0 ? ` +${refineLevel}` : '';
                     const canRefine = Equipment.canRefine(item);
                     const refineBtn = canRefine ? 
                         `<button class="use-btn" style="margin-top: 4px; background-color: #9c27b0;" onclick="RPGUI.showRefineModalForEquipped('${slot}')">精炼</button>` : '';
@@ -55,7 +57,7 @@ const RPGUI = {
                     if (item.durability) statsHtml += `耐久: ${item.durability}<br>`;
                     
                     element.innerHTML = `
-                        <div style="color: ${qualityColor};">${item.name}</div>
+                        <div style="color: ${qualityColor};">${item.name}${refineDisplay}</div>
                         <div style="font-size: 12px; margin-top: 4px;">
                             ${statsHtml}
                         </div>
@@ -84,15 +86,15 @@ const RPGUI = {
             const bonus = Equipment.setBonuses[setName];
             if (bonus) {
                 const pieces2Active = count >= 2;
-                const pieces4Active = count >= 4;
+                const pieces5Active = count >= 5;
                 setBonusHtml += `
-                    <div style="margin-top: 8px; padding: 8px; border: 1px solid ${pieces4Active ? '#4169E1' : pieces2Active ? '#4CAF50' : '#666'}; border-radius: 4px;">
+                    <div style="margin-top: 8px; padding: 8px; border: 1px solid ${pieces5Active ? '#4CAF50' : pieces2Active ? '#4CAF50' : '#666'}; border-radius: 4px;">
                         <div style="color: #4169E1; font-weight: bold;">${setName} (${count}/5)</div>
                         <div style="font-size: 11px; color: ${pieces2Active ? '#4CAF50' : '#666'};">
                             (2) ${this.formatSetBonus(bonus.pieces2)} ${pieces2Active ? '✓' : ''}
                         </div>
-                        <div style="font-size: 11px; color: ${pieces4Active ? '#4169E1' : '#666'};">
-                            (4) ${this.formatSetBonus(bonus.pieces4)} ${pieces4Active ? '✓' : ''}
+                        <div style="font-size: 11px; color: ${pieces5Active ? '#4CAF50' : '#666'};">
+                            (5) ${this.formatSetBonus(bonus.pieces5)} ${pieces5Active ? '✓' : ''}
                         </div>
                     </div>
                 `;
@@ -207,25 +209,28 @@ const RPGUI = {
     showRefineModal(item) {
         if (!item) return;
         
+        const currentRefineLevel = item.refineLevel || 0;
         const cost = Equipment.getRefineCost(item);
         const successRate = Math.round(Equipment.getRefineSuccessRate(item) * 100);
-        const qualityOrder = ['common', 'uncommon', 'rare', 'epic', 'legendary'];
-        const currentIndex = qualityOrder.indexOf(item.quality);
-        const nextQuality = qualityOrder[currentIndex + 1];
-        const nextQualityName = Equipment.qualities[nextQuality]?.name || '未知';
-        const nextQualityColor = Equipment.getQualityColor(nextQuality);
+        const nextRefineLevel = currentRefineLevel + 1;
+        const bonusPercent = Math.round(Equipment.REFINE_BONUS_PER_LEVEL * 100);
         
-        document.getElementById('refineItemName').textContent = item.name;
+        document.getElementById('refineItemName').textContent = `${item.name} +${currentRefineLevel}`;
         document.getElementById('refineItemName').style.color = Equipment.getQualityColor(item.quality);
         
         let stats = '';
-        if (item.attack > 0) stats += `攻击: +${item.attack} `;
-        if (item.defense > 0) stats += `防御: +${item.defense} `;
-        if (item.agility > 0) stats += `敏捷: +${item.agility} `;
+        if (item.attack) stats += `攻击: +${item.attack} `;
+        if (item.defense) stats += `防御: +${item.defense} `;
+        if (item.health) stats += `生命: +${item.health} `;
+        if (item.criticalChance) stats += `暴击率: +${item.criticalChance}% `;
+        if (item.criticalDamage) stats += `暴击伤害: +${item.criticalDamage}% `;
+        if (item.monsterDamage) stats += `怪物伤害: +${item.monsterDamage}% `;
+        if (item.dodge) stats += `闪避: +${item.dodge}% `;
+        if (item.agility) stats += `敏捷: +${item.agility} `;
         document.getElementById('refineItemStats').textContent = stats;
         
-        document.getElementById('refineTargetQuality').textContent = nextQualityName;
-        document.getElementById('refineTargetQuality').style.color = nextQualityColor;
+        document.getElementById('refineTargetQuality').textContent = `+${nextRefineLevel}`;
+        document.getElementById('refineTargetQuality').style.color = '#FFD700';
         document.getElementById('refineCost').textContent = `${cost} 个暗淡的珍珠 (当前: ${State.dullPearls})`;
         document.getElementById('refineSuccessRate').textContent = `${successRate}%`;
         
@@ -234,10 +239,14 @@ const RPGUI = {
             confirmBtn.disabled = true;
             confirmBtn.style.opacity = '0.5';
             confirmBtn.textContent = '材料不足';
+        } else if (currentRefineLevel >= Equipment.MAX_REFINE_LEVEL) {
+            confirmBtn.disabled = true;
+            confirmBtn.style.opacity = '0.5';
+            confirmBtn.textContent = '已达最高';
         } else {
             confirmBtn.disabled = false;
             confirmBtn.style.opacity = '1';
-            confirmBtn.textContent = '精炼';
+            confirmBtn.textContent = `精炼 (+${nextRefineLevel})`;
         }
         
         document.getElementById('refineModal').style.display = 'block';
@@ -260,26 +269,36 @@ const RPGUI = {
                 alert('材料不足');
                 return;
             }
+            
+            const currentRefineLevel = item.refineLevel || 0;
+            if (currentRefineLevel >= Equipment.MAX_REFINE_LEVEL) {
+                alert('已达最高精炼等级');
+                return;
+            }
+            
             State.dullPearls -= cost;
             const success = Math.random() < Equipment.getRefineSuccessRate(item);
             
             if (success) {
-                const qualityOrder = ['common', 'uncommon', 'rare', 'epic', 'legendary'];
-                const currentIndex = qualityOrder.indexOf(item.quality);
-                const newQuality = qualityOrder[currentIndex + 1];
-                const qualityData = Equipment.qualities[newQuality];
+                const newRefineLevel = currentRefineLevel + 1;
+                item.refineLevel = newRefineLevel;
                 
-                item.quality = newQuality;
-                item.name = item.name.replace(/^(普通|优秀|稀有|史诗|传说)\s*/, qualityData.name + ' ');
-                if (item.attack) item.attack = Math.floor(item.attack * 1.3);
-                if (item.defense) item.defense = Math.floor(item.defense * 1.3);
-                if (item.agility) item.agility = Math.floor(item.agility * 1.3);
-                if (item.intelligence) item.intelligence = Math.floor(item.intelligence * 1.3);
-                if (item.vitality) item.vitality = Math.floor(item.vitality * 1.3);
-                item.value = Math.floor(item.value * 1.5);
+                const bonusMultiplier = 1 + Equipment.REFINE_BONUS_PER_LEVEL;
                 
-                Log.add(`精炼成功！装备品质提升为${qualityData.name}`);
-                result = { success: true, message: `精炼成功！装备品质提升为${qualityData.name}` };
+                if (item.attack) item.attack = Math.ceil(item.attack * bonusMultiplier * 100) / 100;
+                if (item.defense) item.defense = Math.ceil(item.defense * bonusMultiplier * 100) / 100;
+                if (item.agility) item.agility = Math.ceil(item.agility * bonusMultiplier * 100) / 100;
+                if (item.intelligence) item.intelligence = Math.ceil(item.intelligence * bonusMultiplier * 100) / 100;
+                if (item.vitality) item.vitality = Math.ceil(item.vitality * bonusMultiplier * 100) / 100;
+                if (item.health) item.health = Math.ceil(item.health * bonusMultiplier * 100) / 100;
+                if (item.criticalChance) item.criticalChance = Math.ceil(item.criticalChance * bonusMultiplier * 100) / 100;
+                if (item.criticalDamage) item.criticalDamage = Math.ceil(item.criticalDamage * bonusMultiplier * 100) / 100;
+                if (item.monsterDamage) item.monsterDamage = Math.ceil(item.monsterDamage * bonusMultiplier * 100) / 100;
+                if (item.dodge) item.dodge = Math.ceil(item.dodge * bonusMultiplier * 100) / 100;
+                item.value = Math.floor(item.value * 1.1);
+                
+                Log.add(`精炼成功！装备精炼等级 +${newRefineLevel}`);
+                result = { success: true, message: `精炼成功！装备精炼等级提升为+${newRefineLevel}` };
             } else {
                 Log.add(`精炼失败！消耗了 ${cost} 个暗淡的珍珠`);
                 result = { success: false, message: '精炼失败，材料已消耗' };
@@ -307,22 +326,6 @@ const RPGUI = {
             document.getElementById('characterTab').classList.add('active');
             document.getElementById('backpackContent').style.display = 'none';
             document.getElementById('characterContent').style.display = 'block';
-        });
-        
-        // 冒险标签页
-        document.getElementById('tabCombat').addEventListener('click', (e) => {
-            e.preventDefault();
-            UI.hideAllMainPanes();
-            document.getElementById('combatPane').style.display = 'block';
-            this.updateCurrentAreaInfo();
-        });
-        
-        // 地区标签页
-        document.getElementById('tabAreas').addEventListener('click', (e) => {
-            e.preventDefault();
-            UI.hideAllMainPanes();
-            document.getElementById('areaPane').style.display = 'block';
-            this.updateAreaList();
         });
         
         // 集市子标签页

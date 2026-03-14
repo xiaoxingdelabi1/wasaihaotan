@@ -44,7 +44,7 @@
                     <div id="backpackGrid" class="backpack-grid"></div>
                 </div>
                 <div id="characterContent" style="display: none; padding: 8px; border-top: 1px solid #ccc; margin-top: 8px;">
-                    <h3 style="margin-bottom: 8px;">👤 角色信息</h3>
+                    <h3 style="margin-bottom: 8px;">角色信息</h3>
                     <div id="characterInfo">
                         <div><strong>等级:</strong> <span id="characterLevel">1</span></div>
                         <div><strong>经验:</strong> <span id="characterExp">0</span>/<span id="characterExpToNext">100</span></div>
@@ -63,16 +63,54 @@
             </div>
         </aside>
 
-        <section class="main-content">
+        <div style="flex: 1; min-width: 400px; display: flex; flex-direction: column; gap: 8px;">
+            <div id="adventureBar" style="border: 1px solid #cccccc; padding: 8px; border-radius: 2px; background-color: #ffffff;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <h3 style="margin: 0; color: #333; font-size: 14px;">战斗</h3>
+                        <select id="adventureAreaSelect" style="padding: 2px 6px; border-radius: 4px; border: 1px solid #ccc; background: transparent; color: #333; cursor: pointer; font-size: 11px;">
+                        </select>
+                    </div>
+                    <button id="autoFightBtn" class="transparent-btn" title="开始/暂停">&gt;</button>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <div style="flex: 1; background: transparent; border: 1px solid #e0e0e0; border-radius: 4px; padding: 6px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                            <span style="font-weight: bold; color: #388e3c; font-size: 11px;">玩家 Lv.<span id="adventurePlayerLevel">1</span></span>
+                            <span id="adventurePlayerExp" style="font-size: 10px; color: #666;">0/200</span>
+                        </div>
+                        <div style="background: #e0e0e0; border-radius: 3px; height: 10px; overflow: hidden; margin-bottom: 2px;">
+                            <div id="adventurePlayerHpBar" style="background: linear-gradient(90deg, #4CAF50, #45a049); height: 100%; width: 100%; transition: width 0.3s;"></div>
+                        </div>
+                        <div style="font-size: 10px; color: #666;">
+                            HP: <span id="adventurePlayerHp">100</span>/<span id="adventurePlayerMaxHp">100</span>
+                        </div>
+                    </div>
+                    <div style="flex: 1; background: transparent; border: 1px solid #e0e0e0; border-radius: 4px; padding: 6px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                            <span id="adventureMonsterName" style="font-weight: bold; color: #d32f2f; font-size: 11px;">等待战斗...</span>
+                            <span id="adventureMonsterLevel" style="font-size: 10px; color: #666;"></span>
+                        </div>
+                        <div style="background: #e0e0e0; border-radius: 3px; height: 10px; overflow: hidden; margin-bottom: 2px;">
+                            <div id="adventureMonsterHpBar" style="background: linear-gradient(90deg, #ff6b6b, #ee5a5a); height: 100%; width: 100%; transition: width 0.3s;"></div>
+                        </div>
+                        <div style="font-size: 10px; color: #666;">
+                            HP: <span id="adventureMonsterHp">0</span>/<span id="adventureMonsterMaxHp">0</span>
+                        </div>
+                    </div>
+                </div>
+                <div id="adventureDrops" style="margin-top: 6px; display: flex; gap: 4px; flex-wrap: wrap; min-height: 16px;">
+                </div>
+            </div>
+            
+            <section class="main-content">
             <div class="tab-bar">
                 <a href="#" id="tabAll">食材收集</a> ·
-                <a href="#" id="tabCombat">冒险</a> ·
+                <a href="#" id="tabEquipment">装备</a> ·
                 <a href="#" id="tabStall">可摆摊</a> ·
                 <a href="#" id="tabMarketShop">集市</a> ·
                 <a href="#" id="tabProcess">自动化</a> ·
-                <a href="#" id="tabHotel">借宿</a> ·
-                <a href="#" id="tabEquipment">装备</a> ·
-                <a href="#" id="tabAreas">地区</a>
+                <a href="#" id="tabHotel">借宿</a>
                 <span class="help-icon">?</span>
             </div>
             <div class="button-group" id="mainButtonGroup">
@@ -215,7 +253,7 @@
                         </div>
                         <div class="refine-info-card">
                             <div class="refine-info-row">
-                                <span class="refine-info-label">目标品质</span>
+                                <span class="refine-info-label">目标等级</span>
                                 <span id="refineTargetQuality" class="refine-info-value"></span>
                             </div>
                             <div class="refine-info-row">
@@ -228,7 +266,7 @@
                             </div>
                         </div>
                         <div class="refine-tips">
-                            <div class="refine-tip">💡 成功后属性+30%</div>
+                            <div class="refine-tip">💡 成功后属性+4%，最高+60%</div>
                             <div class="refine-tip warning">⚠️ 失败材料不返还</div>
                         </div>
                     </div>
@@ -300,16 +338,8 @@
                     </div>
                 </div>
             </div>
-            
-            <div id="combatPane" style="display: none; padding: 16px;">
-            </div>
-            <div id="areaPane" style="display: none; padding: 16px;">
-                <h3>🗺️ 地区</h3>
-                <div id="areaList" style="margin-top: 16px;">
-                    <!-- 地区列表将通过JS动态生成 -->
-                </div>
-            </div>
         </section>
+        </div>
 
         <aside class="right-sidebar">
             <div class="season">
@@ -361,7 +391,7 @@
             </div>
             <div class="achievement-section" id="regionAchievementContent">
                 <div class="achievement-header">
-                    <span id="achievementRegionTitle">🏆 池塘成就</span>
+                    <span id="achievementRegionTitle">池塘成就</span>
                     <span id="achievementProgress">0/5</span>
                 </div>
                 <div id="achievementList" class="achievement-list"></div>
@@ -498,6 +528,13 @@
                 <input type="number" id="devItemQty" min="1" value="1" style="width:80px;">
                 <button id="addToBackpackBtn">添加到背包</button>
             </div>
+            <div class="dev-section">
+                <h3>🎁 获取套装装备</h3>
+                <button id="getPondSetBtn">获取池塘行者套装</button>
+                <button id="getForestSetBtn">获取森林猎手套装</button>
+                <button id="getCaveSetBtn">获取山洞探险家套装</button>
+                <button id="getCastleSetBtn">获取城堡勇士套装</button>
+            </div>
             <div class="dev-panel-footer">
                 <button class="close-dev-btn" id="closeDevPanel">关闭开发者面板</button>
             </div>
@@ -520,6 +557,7 @@
     <script src="js/monsters.js"></script>
     <script src="js/areas.js"></script>
     <script src="js/combat.js"></script>
+    <script src="js/adventure.js"></script>
     <script src="js/rpg-ui.js"></script>
     <script src="js/rpg-integration.js"></script>
     <script src="js/settings.js"></script>

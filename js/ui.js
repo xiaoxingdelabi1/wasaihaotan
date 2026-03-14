@@ -94,8 +94,6 @@ const UI = {
         document.getElementById('marketShopPane').style.display = 'none';
         document.getElementById('hotelPane').style.display = 'none';
         document.getElementById('equipmentPane').style.display = 'none';
-        document.getElementById('combatPane').style.display = 'none';
-        document.getElementById('areaPane').style.display = 'none';
         document.getElementById('autoProcessPane').style.display = 'none';
     },
     

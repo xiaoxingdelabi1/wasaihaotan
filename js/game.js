@@ -28,6 +28,7 @@ const Game = {
         Settings.init();
         RPGUI.init();
         RPGIntegration.init();
+        Adventure.init();
         
         Stall.updateAutoSellButton();
         Market.render();
@@ -386,7 +387,8 @@ const Game = {
         
         this.bindDevEvents();
         
-        UI.setActiveTab(document.getElementById('stallTabBtn'), document.getElementById('stallPane'));
+        UI.hideAllMainPanes();
+        document.getElementById('mainButtonGroup').style.display = 'flex';
     },
     
     bindDevEvents() {
@@ -538,6 +540,22 @@ const Game = {
             Save.import(file);
             e.target.value = '';
         });
+        
+        document.getElementById('getPondSetBtn').addEventListener('click', () => {
+            this.giveSetEquipment('pond');
+        });
+        
+        document.getElementById('getForestSetBtn').addEventListener('click', () => {
+            this.giveSetEquipment('forest');
+        });
+        
+        document.getElementById('getCaveSetBtn').addEventListener('click', () => {
+            this.giveSetEquipment('cave');
+        });
+        
+        document.getElementById('getCastleSetBtn').addEventListener('click', () => {
+            this.giveSetEquipment('castle');
+        });
     },
     
     refreshDevItemList() {
@@ -619,6 +637,58 @@ const Game = {
             html += `<div><b>${key}:</b> ${value}</div>`;
         }
         stateInfo.innerHTML = html;
+    },
+    
+    giveSetEquipment(areaId) {
+        const setData = Equipment.setEquipment[areaId];
+        if (!setData) {
+            alert('未找到该套装配置');
+            return;
+        }
+        
+        const setName = setData.setName;
+        const level = setData.level;
+        const types = setData.types;
+        
+        const typeNames = {
+            armor: '护甲',
+            helmet: '头盔',
+            boots: '鞋子',
+            gloves: '手套',
+            pants: '裤子'
+        };
+        
+        let addedCount = 0;
+        types.forEach(type => {
+            const attrType = Equipment.attributeTypes[Math.floor(Math.random() * Equipment.attributeTypes.length)];
+            const attrValue = Equipment.attributeValues[level][attrType];
+            
+            const equipment = {
+                id: Date.now() + Math.random().toString(36).substr(2, 9),
+                name: `${setName}${typeNames[type]}`,
+                type: type,
+                level: level,
+                quality: 'common',
+                setName: setName,
+                value: attrValue * 5
+            };
+            
+            equipment[attrType] = attrValue;
+            
+            if (State.equipmentBackpack.length < Config.MAX_EQUIPMENT) {
+                State.equipmentBackpack.push(equipment);
+                addedCount++;
+            }
+        });
+        
+        if (addedCount > 0) {
+            Log.add(`开发者获得${setName}套装 (${addedCount}件)`);
+            UI.update();
+            Backpack.render();
+            Save.auto();
+        } else {
+            alert('装备背包已满！');
+        }
     },
     
     startTimers() {

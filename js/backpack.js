@@ -246,6 +246,9 @@ const Backpack = {
         slots.forEach((slot, index) => {
             let typeName = TypeNameMap[slot.type] || slot.type;
             let itemName = slot.item ? slot.item.name : typeName;
+            if (slot.item && slot.item.refineLevel && slot.item.refineLevel > 0) {
+                itemName += ` +${slot.item.refineLevel}`;
+            }
             let buttons = '';
             if (slot.type === 'leaf' || slot.type === 'purse' || slot.type === 'piggyBank' || slot.type === 'bug' || slot.type === 'skewer' || slot.type === 'apple' || slot.type === 'banana' || slot.type === 'watermelon' || slot.type === 'pepper' || slot.type === 'carrot' || slot.type === 'spicySkewer') {
                 if (slot.type === 'bug' || slot.type === 'leaf' || slot.type === 'skewer' || slot.type === 'apple' || slot.type === 'banana' || slot.type === 'watermelon' || slot.type === 'pepper' || slot.type === 'carrot' || slot.type === 'spicySkewer' || slot.type === 'purse') {

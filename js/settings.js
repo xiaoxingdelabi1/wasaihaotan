@@ -74,11 +74,13 @@ const Settings = {
         }
     },
     
-    checkAutoHeal() {
-        if (!this.autoHeal) return false;
+    checkAutoHeal(forceHeal = false) {
+        if (!forceHeal && !this.autoHeal) return false;
         
-        const healthPercent = (Character.currentHealth / Character.maxHealth) * 100;
-        if (healthPercent >= this.healThreshold) return false;
+        if (!forceHeal) {
+            const healthPercent = (Character.currentHealth / Character.maxHealth) * 100;
+            if (healthPercent >= this.healThreshold) return false;
+        }
         
         const healItems = [
             { type: 'bug', name: '虫子', heal: 1, state: 'bugs' },

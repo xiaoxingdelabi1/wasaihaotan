@@ -14,7 +14,7 @@ const Areas = {
         {
             id: 'forest',
             name: '森林',
-            level: 5,
+            level: 2,
             description: '茂密的森林，有更多危险的怪物',
             monsters: ['wolf', 'bear', 'goblin'],
             requiredLevel: 3,

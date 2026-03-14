@@ -11,20 +11,20 @@ const Equipment = {
     
     setBonuses: {
         '池塘行者': {
-            pieces2: { health: 20 },
-            pieces4: { defensePercent: 5, health: 50 }
+            pieces2: { health: 150, defense: 25 },
+            pieces5: { defensePercent: 15, health: 200, defense: 30 }
         },
         '森林猎手': {
-            pieces2: { attack: 5 },
-            pieces4: { criticalChance: 5, attack: 10 }
+            pieces2: { attack: 40, criticalChance: 8 },
+            pieces5: { criticalChance: 12, attack: 50, monsterDamage: 20 }
         },
         '山洞探险家': {
-            pieces2: { criticalDamage: 15 },
-            pieces4: { criticalChance: 8, criticalDamage: 25 }
+            pieces2: { attack: 30, defense: 15, health: 100, criticalDamage: 25 },
+            pieces5: { criticalChance: 10, criticalDamage: 35, attack: 30, health: 150 }
         },
         '城堡勇士': {
-            pieces2: { monsterDamage: 8 },
-            pieces4: { monsterDamage: 15, attack: 15 }
+            pieces2: { monsterDamage: 20, attack: 35 },
+            pieces5: { monsterDamage: 40, attack: 60, health: 300 }
         }
     },
     
@@ -41,10 +41,10 @@ const Equipment = {
     },
     
     attributeValues: {
-        1: { health: 10, defense: 2, attack: 1, criticalChance: 1, criticalDamage: 5, monsterDamage: 2, dodge: 1 },
-        5: { health: 25, defense: 5, attack: 2, criticalChance: 2, criticalDamage: 10, monsterDamage: 4, dodge: 2 },
-        10: { health: 50, defense: 10, attack: 4, criticalChance: 3, criticalDamage: 15, monsterDamage: 6, dodge: 3 },
-        15: { health: 80, defense: 15, attack: 6, criticalChance: 5, criticalDamage: 20, monsterDamage: 8, dodge: 4 }
+        1: { health: 150, defense: 20, attack: 25, criticalChance: 3, criticalDamage: 15, monsterDamage: 5, dodge: 4 },
+        5: { health: 150, defense: 20, attack: 25, criticalChance: 3, criticalDamage: 15, monsterDamage: 5, dodge: 4 },
+        10: { health: 150, defense: 20, attack: 25, criticalChance: 3, criticalDamage: 15, monsterDamage: 5, dodge: 4 },
+        15: { health: 350, defense: 50, attack: 40, criticalChance: 6, criticalDamage: 30, monsterDamage: 15, dodge: 8 }
     },
     
     setEquipment: {
@@ -56,50 +56,50 @@ const Equipment = {
     
     equipmentPool: {
         weapon: [
-            { name: '木棍', level: 1, attack: 5, quality: 'common' },
-            { name: '铁剑', level: 5, attack: 12, quality: 'uncommon' },
-            { name: '钢剑', level: 10, attack: 20, quality: 'rare' },
-            { name: '火焰剑', level: 15, attack: 30, quality: 'epic' },
-            { name: '王者之剑', level: 20, attack: 45, quality: 'legendary' }
+            { name: '木棍', level: 1 },
+            { name: '铁剑', level: 5 },
+            { name: '钢剑', level: 10 },
+            { name: '火焰剑', level: 15 },
+            { name: '王者之剑', level: 20 }
         ],
         armor: [
-            { name: '布甲', level: 1, defense: 3, quality: 'common' },
-            { name: '皮甲', level: 5, defense: 8, quality: 'uncommon' },
-            { name: '铁甲', level: 10, defense: 15, quality: 'rare' },
-            { name: '钢甲', level: 15, defense: 25, quality: 'epic' },
-            { name: '龙鳞甲', level: 20, defense: 40, quality: 'legendary' }
+            { name: '布甲', level: 1 },
+            { name: '皮甲', level: 5 },
+            { name: '铁甲', level: 10 },
+            { name: '钢甲', level: 15 },
+            { name: '龙鳞甲', level: 20 }
         ],
         helmet: [
-            { name: '布帽', level: 1, defense: 1, quality: 'common' },
-            { name: '皮帽', level: 5, defense: 3, quality: 'uncommon' },
-            { name: '铁盔', level: 10, defense: 6, quality: 'rare' },
-            { name: '钢盔', level: 15, defense: 10, quality: 'epic' },
-            { name: '龙首盔', level: 20, defense: 15, quality: 'legendary' }
+            { name: '布帽', level: 1 },
+            { name: '皮帽', level: 5 },
+            { name: '铁盔', level: 10 },
+            { name: '钢盔', level: 15 },
+            { name: '龙首盔', level: 20 }
         ],
         boots: [
-            { name: '布鞋', level: 1, defense: 1, dodge: 1, quality: 'common' },
-            { name: '皮靴', level: 5, defense: 2, dodge: 2, quality: 'uncommon' },
-            { name: '铁靴', level: 10, defense: 4, dodge: 3, quality: 'rare' },
-            { name: '钢靴', level: 15, defense: 6, dodge: 4, quality: 'epic' },
-            { name: '龙靴', level: 20, defense: 10, dodge: 6, quality: 'legendary' }
+            { name: '布鞋', level: 1 },
+            { name: '皮靴', level: 5 },
+            { name: '铁靴', level: 10 },
+            { name: '钢靴', level: 15 },
+            { name: '龙靴', level: 20 }
         ],
         gloves: [
-            { name: '布手套', level: 1, attack: 1, quality: 'common' },
-            { name: '皮手套', level: 5, attack: 2, quality: 'uncommon' },
-            { name: '铁手套', level: 10, attack: 4, quality: 'rare' },
-            { name: '钢手套', level: 15, attack: 6, quality: 'epic' },
-            { name: '龙爪手套', level: 20, attack: 10, quality: 'legendary' }
+            { name: '布手套', level: 1 },
+            { name: '皮手套', level: 5 },
+            { name: '铁手套', level: 10 },
+            { name: '钢手套', level: 15 },
+            { name: '龙爪手套', level: 20 }
         ],
         pants: [
-            { name: '布裤', level: 1, defense: 2, quality: 'common' },
-            { name: '皮裤', level: 5, defense: 5, quality: 'uncommon' },
-            { name: '铁裤', level: 10, defense: 10, quality: 'rare' },
-            { name: '钢裤', level: 15, defense: 15, quality: 'epic' },
-            { name: '龙鳞裤', level: 20, defense: 25, quality: 'legendary' }
+            { name: '布裤', level: 1 },
+            { name: '皮裤', level: 5 },
+            { name: '铁裤', level: 10 },
+            { name: '钢裤', level: 15 },
+            { name: '龙鳞裤', level: 20 }
         ],
         tool: [
-            { name: '锄头', level: 1, durability: 10, value: 10, quality: 'common' },
-            { name: '捕虫网', level: 1, durability: 100, value: 15, quality: 'common' }
+            { name: '锄头', level: 1, durability: 10, value: 10 },
+            { name: '捕虫网', level: 1, durability: 100, value: 15 }
         ]
     },
     
@@ -118,7 +118,6 @@ const Equipment = {
         const type = this.types[Math.floor(Math.random() * this.types.length)];
         const pool = this.equipmentPool[type];
         
-        // 根据区域等级选择装备
         const eligibleItems = pool.filter(item => item.level <= areaLevel + 5);
         if (eligibleItems.length === 0) {
             return null;
@@ -126,28 +125,29 @@ const Equipment = {
         
         const baseItem = eligibleItems[Math.floor(Math.random() * eligibleItems.length)];
         
-        // 随机品质
         const qualityKeys = Object.keys(this.qualities);
         const quality = qualityKeys[Math.floor(Math.random() * qualityKeys.length)];
         const qualityData = this.qualities[quality];
         
-        // 生成装备
         const equipment = {
             id: Date.now() + Math.random().toString(36).substr(2, 9),
             name: `${qualityData.name} ${baseItem.name}`,
             type: type,
             level: baseItem.level,
             quality: quality,
-            attack: baseItem.attack ? Math.floor(baseItem.attack * qualityData.multiplier) : 0,
-            defense: baseItem.defense ? Math.floor(baseItem.defense * qualityData.multiplier) : 0,
-            agility: baseItem.agility ? Math.floor(baseItem.agility * qualityData.multiplier) : 0,
-            intelligence: baseItem.intelligence ? Math.floor(baseItem.intelligence * qualityData.multiplier) : 0,
-            vitality: baseItem.vitality ? Math.floor(baseItem.vitality * qualityData.multiplier) : 0,
-            criticalChance: baseItem.criticalChance ? Math.floor(baseItem.criticalChance * qualityData.multiplier) : 0,
-            criticalDamage: baseItem.criticalDamage ? Math.floor(baseItem.criticalDamage * qualityData.multiplier) : 0,
-            dodge: baseItem.dodge ? Math.floor(baseItem.dodge * qualityData.multiplier) : 0,
-            value: Math.floor((baseItem.attack || 0 + baseItem.defense || 0) * qualityData.multiplier * 10)
+            value: 10
         };
+        
+        if (type === 'tool' && baseItem.durability) {
+            equipment.durability = baseItem.durability;
+            equipment.maxDurability = baseItem.durability;
+            equipment.value = baseItem.value;
+        } else {
+            const attrType = this.attributeTypes[Math.floor(Math.random() * this.attributeTypes.length)];
+            const attrValue = this.attributeValues[baseItem.level] ? this.attributeValues[baseItem.level][attrType] : this.attributeValues[1][attrType];
+            equipment[attrType] = Math.floor(attrValue * qualityData.multiplier);
+            equipment.value = Math.floor(attrValue * qualityData.multiplier * 5);
+        }
         
         return equipment;
     },
@@ -171,16 +171,19 @@ const Equipment = {
             type: type,
             level: baseItem.level,
             quality: quality,
-            attack: baseItem.attack ? Math.floor(baseItem.attack * qualityData.multiplier) : 0,
-            defense: baseItem.defense ? Math.floor(baseItem.defense * qualityData.multiplier) : 0,
-            agility: baseItem.agility ? Math.floor(baseItem.agility * qualityData.multiplier) : 0,
-            intelligence: baseItem.intelligence ? Math.floor(baseItem.intelligence * qualityData.multiplier) : 0,
-            vitality: baseItem.vitality ? Math.floor(baseItem.vitality * qualityData.multiplier) : 0,
-            criticalChance: baseItem.criticalChance ? Math.floor(baseItem.criticalChance * qualityData.multiplier) : 0,
-            criticalDamage: baseItem.criticalDamage ? Math.floor(baseItem.criticalDamage * qualityData.multiplier) : 0,
-            dodge: baseItem.dodge ? Math.floor(baseItem.dodge * qualityData.multiplier) : 0,
-            value: Math.floor((baseItem.attack || 0 + baseItem.defense || 0) * qualityData.multiplier * 10)
+            value: 10
         };
+        
+        if (type === 'tool' && baseItem.durability) {
+            equipment.durability = baseItem.durability;
+            equipment.maxDurability = baseItem.durability;
+            equipment.value = baseItem.value;
+        } else {
+            const attrType = this.attributeTypes[Math.floor(Math.random() * this.attributeTypes.length)];
+            const attrValue = this.attributeValues[baseItem.level] ? this.attributeValues[baseItem.level][attrType] : this.attributeValues[1][attrType];
+            equipment[attrType] = Math.floor(attrValue * qualityData.multiplier);
+            equipment.value = Math.floor(attrValue * qualityData.multiplier * 5);
+        }
         
         return equipment;
     },
@@ -213,34 +216,40 @@ const Equipment = {
     },
     
     refineCosts: {
-        common: 3,
-        uncommon: 5,
-        rare: 8,
-        epic: 12
+        0: 1, 1: 2, 2: 3, 3: 4, 4: 5,
+        5: 6, 6: 7, 7: 8, 8: 10, 9: 12,
+        10: 15, 11: 18, 12: 22, 13: 26, 14: 30
     },
     
     refineSuccessRates: {
-        common: 0.8,
-        uncommon: 0.6,
-        rare: 0.4,
-        epic: 0.2
+        0: 1.0, 1: 1.0, 2: 0.9, 3: 0.85, 4: 0.8,
+        5: 0.7, 6: 0.6, 7: 0.5, 8: 0.4, 9: 0.35,
+        10: 0.3, 11: 0.25, 12: 0.2, 13: 0.15, 14: 0.1
     },
+    
+    MAX_REFINE_LEVEL: 15,
+    REFINE_BONUS_PER_LEVEL: 0.04,
     
     canRefine(equipment) {
         if (!equipment) return false;
-        const qualityOrder = ['common', 'uncommon', 'rare', 'epic', 'legendary'];
-        const currentIndex = qualityOrder.indexOf(equipment.quality);
-        return currentIndex < qualityOrder.length - 1;
+        const refineLevel = equipment.refineLevel || 0;
+        return refineLevel < this.MAX_REFINE_LEVEL;
     },
     
     getRefineCost(equipment) {
         if (!equipment) return 0;
-        return this.refineCosts[equipment.quality] || 0;
+        const refineLevel = equipment.refineLevel || 0;
+        return this.refineCosts[refineLevel] || 999;
     },
     
     getRefineSuccessRate(equipment) {
         if (!equipment) return 0;
-        return this.refineSuccessRates[equipment.quality] || 0;
+        const refineLevel = equipment.refineLevel || 0;
+        return this.refineSuccessRates[refineLevel] || 0;
+    },
+    
+    getRefineBonus(refineLevel) {
+        return (refineLevel || 0) * this.REFINE_BONUS_PER_LEVEL;
     },
     
     refine(equipmentIndex) {
@@ -250,7 +259,7 @@ const Equipment = {
         }
         
         if (!this.canRefine(equipment)) {
-            return { success: false, message: '该装备已达到最高品质，无法精炼' };
+            return { success: false, message: '该装备已达到最高精炼等级+15' };
         }
         
         const cost = this.getRefineCost(equipment);
@@ -264,36 +273,48 @@ const Equipment = {
         State.dullPearls -= cost;
         
         if (success) {
-            const qualityOrder = ['common', 'uncommon', 'rare', 'epic', 'legendary'];
-            const currentIndex = qualityOrder.indexOf(equipment.quality);
-            const newQuality = qualityOrder[currentIndex + 1];
-            const qualityData = this.qualities[newQuality];
+            const oldRefineLevel = equipment.refineLevel || 0;
+            const newRefineLevel = oldRefineLevel + 1;
+            equipment.refineLevel = newRefineLevel;
             
-            const oldName = equipment.name;
-            equipment.quality = newQuality;
-            equipment.name = equipment.name.replace(/^(普通|优秀|稀有|史诗|传说)\s*/, qualityData.name + ' ');
+            const bonusMultiplier = 1 + this.REFINE_BONUS_PER_LEVEL;
             
             if (equipment.attack) {
-                equipment.attack = Math.floor(equipment.attack * 1.3);
+                equipment.attack = Math.ceil(equipment.attack * bonusMultiplier * 100) / 100;
             }
             if (equipment.defense) {
-                equipment.defense = Math.floor(equipment.defense * 1.3);
+                equipment.defense = Math.ceil(equipment.defense * bonusMultiplier * 100) / 100;
             }
             if (equipment.agility) {
-                equipment.agility = Math.floor(equipment.agility * 1.3);
+                equipment.agility = Math.ceil(equipment.agility * bonusMultiplier * 100) / 100;
             }
             if (equipment.intelligence) {
-                equipment.intelligence = Math.floor(equipment.intelligence * 1.3);
+                equipment.intelligence = Math.ceil(equipment.intelligence * bonusMultiplier * 100) / 100;
             }
             if (equipment.vitality) {
-                equipment.vitality = Math.floor(equipment.vitality * 1.3);
+                equipment.vitality = Math.ceil(equipment.vitality * bonusMultiplier * 100) / 100;
+            }
+            if (equipment.health) {
+                equipment.health = Math.ceil(equipment.health * bonusMultiplier * 100) / 100;
+            }
+            if (equipment.criticalChance) {
+                equipment.criticalChance = Math.ceil(equipment.criticalChance * bonusMultiplier * 100) / 100;
+            }
+            if (equipment.criticalDamage) {
+                equipment.criticalDamage = Math.ceil(equipment.criticalDamage * bonusMultiplier * 100) / 100;
+            }
+            if (equipment.monsterDamage) {
+                equipment.monsterDamage = Math.ceil(equipment.monsterDamage * bonusMultiplier * 100) / 100;
+            }
+            if (equipment.dodge) {
+                equipment.dodge = Math.ceil(equipment.dodge * bonusMultiplier * 100) / 100;
             }
             
-            equipment.value = Math.floor(equipment.value * 1.5);
+            equipment.value = Math.floor(equipment.value * 1.1);
             
-            Log.add(`精炼成功！${oldName} → ${equipment.name}`);
+            Log.add(`精炼成功！装备精炼等级 +${newRefineLevel}`);
             Save.auto();
-            return { success: true, message: `精炼成功！装备品质提升为${qualityData.name}` };
+            return { success: true, message: `精炼成功！装备精炼等级提升为+${newRefineLevel}` };
         } else {
             Log.add(`精炼失败！消耗了 ${cost} 个暗淡的珍珠`);
             Save.auto();
@@ -365,8 +386,8 @@ const Equipment = {
         const bonus = this.setBonuses[setName];
         if (!bonus) return null;
         
-        if (pieceCount >= 4) {
-            return { ...bonus.pieces2, ...bonus.pieces4 };
+        if (pieceCount >= 5) {
+            return { ...bonus.pieces2, ...bonus.pieces5 };
         } else if (pieceCount >= 2) {
             return bonus.pieces2;
         }

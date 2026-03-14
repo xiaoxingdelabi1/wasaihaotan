@@ -1,7 +1,7 @@
 const Character = {
     level: 1,
     experience: 0,
-    experienceToNext: 100,
+    experienceToNext: 200,
     
     // 基础属性
     strength: 10,      // 影响攻击力
@@ -45,7 +45,7 @@ const Character = {
         // 重置角色基础属性
         this.level = 1;
         this.experience = 0;
-        this.experienceToNext = 100;
+        this.experienceToNext = 200;
         
         // 基础属性
         this.strength = 10;      // 影响攻击力
@@ -69,7 +69,9 @@ const Character = {
             armor: null,
             helmet: null,
             boots: null,
-            gloves: null
+            gloves: null,
+            pants: null,
+            tool: null
         };
         
         // 技能
@@ -92,12 +94,14 @@ const Character = {
         let baseCriticalChance = 5 + this.agility * 0.5;
         let baseDodge = 3 + this.agility * 0.3;
         let baseMonsterDamage = 0;
+        let baseHealth = 80 + this.vitality * 10;
         
         // 装备加成
         Object.values(this.equipment).forEach(item => {
             if (item) {
                 baseAttack += item.attack || 0;
                 baseDefense += item.defense || 0;
+                baseHealth += item.health || 0;
                 baseCriticalChance += item.criticalChance || 0;
                 baseDodge += item.dodge || 0;
                 baseMonsterDamage += item.monsterDamage || 0;
@@ -107,7 +111,7 @@ const Character = {
         // 套装加成
         const setBonuses = Equipment.calculateSetBonuses(this.equipment);
         if (setBonuses.health) {
-            this.maxHealth += setBonuses.health;
+            baseHealth += setBonuses.health;
         }
         if (setBonuses.defense) {
             baseDefense += setBonuses.defense;
@@ -133,11 +137,11 @@ const Character = {
         
         this.attack = Math.floor(baseAttack);
         this.defense = Math.floor(baseDefense);
-        this.criticalChance = Math.min(baseCriticalChance, 50); // 最高50%
-        this.criticalDamage = 150; // 基础暴击伤害150%
+        this.criticalChance = Math.min(baseCriticalChance, 50);
+        this.criticalDamage = 150;
         this.monsterDamage = Math.floor(baseMonsterDamage);
-        this.dodge = Math.min(baseDodge, 30); // 最高30%
-        this.maxHealth = 80 + this.vitality * 10;
+        this.dodge = Math.min(baseDodge, 30);
+        this.maxHealth = Math.floor(baseHealth);
         this.currentHealth = Math.min(this.currentHealth, this.maxHealth);
     },
     
@@ -153,7 +157,12 @@ const Character = {
     levelUp() {
         this.level++;
         this.experience -= this.experienceToNext;
-        this.experienceToNext = Math.floor(this.experienceToNext * 1.5);
+        let baseExp = Math.floor(this.experienceToNext * 1.5);
+        if (this.level < 10) {
+            this.experienceToNext = baseExp * 2;
+        } else {
+            this.experienceToNext = baseExp;
+        }
         
         // 分配属性点
         this.strength += 2;
@@ -172,7 +181,7 @@ const Character = {
     equip(item) {
         if (item.type === 'weapon' || item.type === 'armor' || 
             item.type === 'helmet' || item.type === 'boots' || 
-            item.type === 'gloves' || item.type === 'tool') {
+            item.type === 'gloves' || item.type === 'pants' || item.type === 'tool') {
             
             const oldItem = this.equipment[item.type];
             this.equipment[item.type] = item;
