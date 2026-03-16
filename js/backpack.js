@@ -555,12 +555,16 @@ const Backpack = {
                 remaining -= count;
             }
         }
+        
+        State.equipmentBackpack.forEach((equipment, index) => {
+            slots.push({ type: `equipment_${index}`, count: 1, isEquipment: true, equipment: equipment });
+        });
 
         let html = '';
         slots.forEach((slot, index) => {
-            let typeName = TypeNameMap[slot.type] || slot.type;
+            let typeName = TypeNameMap[slot.type] || (slot.isEquipment ? slot.equipment.name : slot.type);
             html += `
-                <div class="backpack-main-slot" data-slot-type="${slot.type}" data-slot-count="${slot.count}">
+                <div class="backpack-main-slot" data-slot-type="${slot.type}" data-slot-count="${slot.count}" data-is-equipment="${slot.isEquipment || false}">
                     <span>${typeName}</span>
                     <span>${slot.count}</span>
                 </div>
@@ -571,10 +575,17 @@ const Backpack = {
         document.querySelectorAll('.backpack-main-slot').forEach(el => {
             el.addEventListener('click', () => {
                 const type = el.dataset.slotType;
+                const isEquipment = el.dataset.isEquipment === 'true';
                 const slotCount = parseInt(el.dataset.slotCount, 10);
-                const total = ItemManager.getCount(type);
-                if (total <= 0) return;
-                Stall.openModalForItem(type, slotCount, total);
+                
+                if (isEquipment) {
+                    const equipmentIndex = parseInt(type.split('_')[1]);
+                    Stall.openModalForItem('equipment', 1, 1, equipmentIndex);
+                } else {
+                    const total = ItemManager.getCount(type);
+                    if (total <= 0) return;
+                    Stall.openModalForItem(type, slotCount, total);
+                }
             });
         });
     },

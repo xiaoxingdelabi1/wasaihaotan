@@ -3,13 +3,6 @@
  * 未经许可禁止复制、修改、分发
  */
 const Game = {
-    netCatchInterval: null,
-    netCatchProgress: 0,
-    
-    isNetCatching() {
-        return this.netCatchInterval !== null;
-    },
-    
     init() {
         State.reset();
         
@@ -131,108 +124,6 @@ const Game = {
             UI.update();
             Achievement.render();
             Save.auto();
-        });
-        
-        document.getElementById('buyBugNetBtn').addEventListener('click', () => {
-            if (State.coins < 15) {
-                alert('金币不足');
-                return;
-            }
-            
-            if (!Character.equipment.tools) {
-                Character.equipment.tools = [];
-            }
-            
-            if (Character.equipment.tools.length >= Tool.maxTools) {
-                alert('工具槽已满');
-                return;
-            }
-            
-            State.coins -= 15;
-            
-            const bugNet = {
-                id: Date.now() + Math.random().toString(36).substr(2, 9),
-                name: '普通 捕虫网',
-                type: 'tool',
-                level: 1,
-                description: '自动捕捉虫子'
-            };
-            
-            Character.equipment.tools.push(bugNet);
-            Log.add('购买了捕虫网并装备');
-            UI.update();
-            Save.auto();
-        });
-        
-        document.getElementById('netCatchBugBtn').addEventListener('click', () => {
-            const btn = document.getElementById('netCatchBugBtn');
-            
-            if (Game.netCatchInterval) {
-                clearInterval(Game.netCatchInterval);
-                Game.netCatchInterval = null;
-                Game.netCatchProgress = 0;
-                btn.innerHTML = `捕虫网捕虫`;
-                btn.style.background = '';
-                return;
-            }
-            
-            const hasBugNet = Tool.hasTool('捕虫网');
-            if (!hasBugNet) {
-                alert('请先装备捕虫网');
-                return;
-            }
-            
-            Game.netCatchProgress = 0;
-            
-            Game.netCatchInterval = setInterval(() => {
-                if (!Tool.hasTool('捕虫网')) {
-                    clearInterval(Game.netCatchInterval);
-                    Game.netCatchInterval = null;
-                    Game.netCatchProgress = 0;
-                    Log.add('捕虫网已卸下，停止捕虫');
-                    btn.style.background = '';
-                    UI.update();
-                    return;
-                }
-                
-                if (State.bugs >= Config.MAX_BUGS) {
-                    clearInterval(Game.netCatchInterval);
-                    Game.netCatchInterval = null;
-                    Game.netCatchProgress = 0;
-                    Log.add('虫子已达上限，停止捕虫');
-                    btn.innerHTML = `捕虫网捕虫`;
-                    btn.style.background = '';
-                    UI.update();
-                    return;
-                }
-                
-                if (!Backpack.canAddItem('bug', 1)) {
-                    clearInterval(Game.netCatchInterval);
-                    Game.netCatchInterval = null;
-                    Game.netCatchProgress = 0;
-                    Log.add('背包已满，停止捕虫');
-                    btn.innerHTML = `捕虫网捕虫`;
-                    btn.style.background = '';
-                    UI.update();
-                    return;
-                }
-                
-                Game.netCatchProgress += 5;
-                
-                if (Game.netCatchProgress >= 100) {
-                    Game.netCatchProgress = 0;
-                    State.bugs++;
-                }
-                
-                btn.innerHTML = `捕虫中... ${Math.floor(Game.netCatchProgress)}%`;
-                btn.style.background = `linear-gradient(to right, rgba(76, 175, 80, 0.4) ${Game.netCatchProgress}%, transparent ${Game.netCatchProgress}%)`;
-                
-                UI.update();
-                Save.auto();
-            }, 50);
-            
-            btn.innerHTML = `捕虫中... 0%`;
-            btn.style.background = 'linear-gradient(to right, rgba(76, 175, 80, 0.4) 0%, transparent 0%)';
         });
         
         document.getElementById('skewerBtn').addEventListener('click', () => {
@@ -704,11 +595,7 @@ const Game = {
     autoProcessInterval: null,
     
     startAutoProcess() {
-        if (this.autoProcessInterval) return;
-        
-        this.autoProcessInterval = setInterval(() => {
-            Automation.process();
-        }, 2000);
+        // Automation now uses per-card intervals instead of global process
     }
 };
 

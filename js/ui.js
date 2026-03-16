@@ -25,33 +25,6 @@ const UI = {
             spicySkewerBtn.style.display = 'none';
         }
 
-        const netCatchBugBtn = document.getElementById('netCatchBugBtn');
-        const buyBugNetBtn = document.getElementById('buyBugNetBtn');
-        const hasBugNet = Tool.hasTool('捕虫网');
-        
-        if (hasBugNet) {
-            netCatchBugBtn.disabled = false;
-            netCatchBugBtn.classList.remove('disabled');
-            netCatchBugBtn.style.display = 'block';
-            if (!Game.isNetCatching()) {
-                netCatchBugBtn.innerHTML = `捕虫网捕虫`;
-                netCatchBugBtn.style.background = '';
-            }
-            buyBugNetBtn.style.display = 'none';
-        } else {
-            netCatchBugBtn.disabled = true;
-            netCatchBugBtn.classList.add('disabled');
-            netCatchBugBtn.style.display = 'none';
-            
-            if (State.coins >= 15) {
-                buyBugNetBtn.style.display = 'block';
-                buyBugNetBtn.disabled = false;
-                buyBugNetBtn.classList.remove('disabled');
-            } else {
-                buyBugNetBtn.style.display = 'none';
-            }
-        }
-
         const pickPepperBtn = document.getElementById('pickPepperBtn');
         const forestArea = Areas.areas.find(a => a.id === 'forest');
         if (forestArea && forestArea.isUnlocked) {

@@ -129,7 +129,7 @@ const Stall = {
             if (filterType !== 'all' && item.type !== filterType) return;
             
             const marketPrice = this.getMarketPrice(type);
-            if (marketPrice > minPrice) return;
+            if (marketPrice < minPrice) return;
             
             const stallCap = this.getStallCapacity(type);
             const itemName = ItemManager.getName(type);
@@ -155,6 +155,35 @@ const Stall = {
             listed = true;
             messages.push(`${itemName}x${qty}`);
         });
+        
+        if (State.stallItems.length < maxStalls && filterType === 'all') {
+            for (let i = State.equipmentBackpack.length - 1; i >= 0; i--) {
+                if (State.stallItems.length >= maxStalls) break;
+                
+                const equipment = State.equipmentBackpack[i];
+                if (!equipment) continue;
+                
+                const marketPrice = equipment.value || 10;
+                if (marketPrice < minPrice) continue;
+                
+                State.stallItems.push({
+                    type: 'equipment',
+                    equipmentData: equipment,
+                    remaining: 1,
+                    total: 1,
+                    basePrice: marketPrice,
+                    customPrice: marketPrice,
+                    baseSpeed: 5,
+                    meanTime: 5,
+                    timeRemaining: Utils.generateSaleTime(5)
+                });
+                
+                State.equipmentBackpack.splice(i, 1);
+                State.stallCount++;
+                listed = true;
+                messages.push(`${equipment.name}x1`);
+            }
+        }
         
         if (listed) {
             Log.add(`自动上架了 ${messages.join('、')}`);
