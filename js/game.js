@@ -601,4 +601,9 @@ const Game = {
 
 document.addEventListener('DOMContentLoaded', () => {
     Game.init();
+    
+    document.getElementById('donateLink').addEventListener('click', (e) => {
+        e.preventDefault();
+        document.getElementById('donateModal').style.display = 'block';
+    });
 });
