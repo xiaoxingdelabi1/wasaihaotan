@@ -388,13 +388,10 @@ const RPGUI = {
     
     // 渲染地区怪物列表
     renderAreaMonsters() {
-        console.log('renderAreaMonsters called');
         const area = Areas.getCurrentArea();
-        console.log('Current area:', area);
         if (!area) return;
         
         const combatPane = document.getElementById('combatPane');
-        console.log('Combat pane:', combatPane);
         if (!combatPane) return;
         
         // 清空现有的内容，保留 combatContainer
@@ -601,13 +598,10 @@ const RPGUI = {
             return;
         }
         
-        console.log('startFightWithMonster called with monsterType:', monsterType);
         const area = Areas.getCurrentArea();
-        console.log('Current area:', area);
         if (!area) return;
         
         const baseMonster = Monsters.getMonsterInfo(monsterType);
-        console.log('Base monster:', baseMonster);
         if (!baseMonster) return;
         
         // 克隆怪物对象
@@ -646,13 +640,27 @@ const RPGUI = {
     
     // 取下装备
     unequipItem(slot) {
-        const item = Character.unequip(slot);
+        const item = Character.equipment[slot];
         if (!item) return;
         
-        // 将装备添加到装备背包
-        State.equipmentBackpack.push(item);
-        Log.add(`取下了 ${item.name}`);
-        UI.update();
-        Save.auto();
+        // 检查普通背包槽位是否已满（装备占用普通背包槽位）
+        const currentUsed = Backpack.getUsedSlots();
+        if (currentUsed >= State.backpackCapacity) {
+            alert('背包已满，无法卸下装备！');
+            return;
+        }
+        
+        const unequippedItem = Character.unequip(slot);
+        if (!unequippedItem) return;
+        
+        const result = Equipment.addToBackpack(unequippedItem);
+        if (result.success) {
+            Log.add(`取下了 ${unequippedItem.name}`);
+            UI.update();
+            Save.auto();
+        } else {
+            Character.equip(slot, unequippedItem);
+            alert(result.message + '，无法卸下装备！');
+        }
     }
 };

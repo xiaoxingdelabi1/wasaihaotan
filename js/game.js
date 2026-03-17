@@ -12,7 +12,7 @@ const Game = {
                 const data = JSON.parse(saved);
                 State.loadSaveData(data);
             } catch(e) {
-                console.error('Failed to load save:', e);
+                // 加载失败时初始化角色
             }
         } else {
             Character.init();
@@ -23,9 +23,10 @@ const Game = {
         RPGIntegration.init();
         Adventure.init();
         Automation.init();
+        ItemTooltip.init();
         
         Stall.updateAutoSellButton();
-        Market.render();
+        Market.render('all');
         Shop.refresh();
         Shop.render();
         Backpack.render();
@@ -111,15 +112,11 @@ const Game = {
         });
         
         document.getElementById('catchBugBtn').addEventListener('click', () => {
-            if (State.bugs >= Config.MAX_BUGS) {
-                alert('虫子已达上限');
+            const result = Backpack.addResource('bug', 1);
+            if (!result.success) {
+                alert(result.message);
                 return;
             }
-            if (!Backpack.canAddItem('bug', 1)) {
-                alert('背包已满！');
-                return;
-            }
-            State.bugs++;
             Log.add('捕捉了1只虫子');
             UI.update();
             Achievement.render();
@@ -128,31 +125,23 @@ const Game = {
         
         document.getElementById('skewerBtn').addEventListener('click', () => {
             if (State.bugs < 10) return;
-            if (State.skewers >= Config.MAX_SKEWERS) {
-                alert('虫虫串已达上限');
-                return;
-            }
-            if (!Backpack.canAddItem('skewer', 1)) {
-                alert('背包空间不足，无法串成串！');
+            const result = Backpack.addResource('skewer', 1);
+            if (!result.success) {
+                alert(result.message);
                 return;
             }
             State.bugs -= 10;
-            State.skewers++;
             Log.add('将10只虫子串成1个虫虫串');
             UI.update();
             Save.auto();
         });
         
         document.getElementById('pickPepperBtn').addEventListener('click', () => {
-            if (State.peppers >= Config.MAX_PEPPERS) {
-                alert('辣椒已达上限');
+            const result = Backpack.addResource('pepper', 1);
+            if (!result.success) {
+                alert(result.message);
                 return;
             }
-            if (!Backpack.canAddItem('pepper', 1)) {
-                alert('背包空间不足');
-                return;
-            }
-            State.peppers++;
             Log.add('采摘了1个山椒');
             UI.update();
             Save.auto();
@@ -160,17 +149,13 @@ const Game = {
         
         document.getElementById('spicySkewerBtn').addEventListener('click', () => {
             if (State.peppers < 1 || State.skewers < 1) return;
-            if (State.spicySkewers >= 50) {
-                alert('咻咻辣辣串已达上限');
-                return;
-            }
-            if (!Backpack.canAddItem('spicySkewer', 1)) {
-                alert('背包空间不足，无法制作咻咻辣辣串！');
+            const result = Backpack.addResource('spicySkewer', 1);
+            if (!result.success) {
+                alert(result.message);
                 return;
             }
             State.peppers -= 1;
             State.skewers -= 1;
-            State.spicySkewers++;
             Log.add('制作了1个咻咻辣辣串');
             UI.update();
             Save.auto();
@@ -554,6 +539,7 @@ const Game = {
         };
         
         let addedCount = 0;
+        let failedCount = 0;
         types.forEach(type => {
             const attrType = Equipment.attributeTypes[Math.floor(Math.random() * Equipment.attributeTypes.length)];
             const attrValue = Equipment.attributeValues[level][attrType];
@@ -570,9 +556,11 @@ const Game = {
             
             equipment[attrType] = attrValue;
             
-            if (State.equipmentBackpack.length < Config.MAX_EQUIPMENT) {
-                State.equipmentBackpack.push(equipment);
+            const result = Equipment.addToBackpack(equipment);
+            if (result.success) {
                 addedCount++;
+            } else {
+                failedCount++;
             }
         });
         
@@ -581,8 +569,9 @@ const Game = {
             UI.update();
             Backpack.render();
             Save.auto();
-        } else {
-            alert('装备背包已满！');
+        }
+        if (failedCount > 0) {
+            alert(`装备背包已满，${failedCount}件装备未能添加！`);
         }
     },
     

@@ -1,5 +1,6 @@
 const Adventure = {
     isAutoFighting: false,
+    isDead: false,
     currentMonster: null,
     currentAreaId: 'pond',
     fightInterval: null,
@@ -11,8 +12,20 @@ const Adventure = {
     init() {
         this.currentAreaId = Areas.currentArea || 'pond';
         this.bindEvents();
-        this.startAutoFight();
-        this.updateUI();
+        
+        // 恢复保存的怪物状态
+        if (State.currentMonster) {
+            this.currentMonster = State.currentMonster;
+            this.updateMonsterUI();
+            this.addLog(`继续战斗：${this.currentMonster.name}`, '#ff6b6b');
+        }
+        
+        // 根据保存的状态决定是否自动开始战斗
+        if (!State.autoFightPaused) {
+            this.startAutoFight();
+        } else {
+            this.updateUI();
+        }
     },
     
     bindEvents() {
@@ -56,6 +69,9 @@ const Adventure = {
         }
         
         this.isAutoFighting = true;
+        State.autoFightPaused = false; // 保存状态：正在战斗
+        Save.auto();
+        
         const btn = document.getElementById('autoFightBtn');
         btn.textContent = '||';
         btn.classList.add('active');
@@ -69,12 +85,18 @@ const Adventure = {
             this.repeatCount = parseInt(repeatSelect.value);
         }
         
-        this.spawnMonster();
+        // 如果没有保存的怪物，才生成新怪物
+        if (!this.currentMonster) {
+            this.spawnMonster();
+        }
         this.fightInterval = setInterval(() => this.fightTurn(), 500);
     },
     
     stopAutoFight() {
         this.isAutoFighting = false;
+        State.autoFightPaused = true; // 保存状态：已暂停
+        Save.auto();
+        
         if (this.fightInterval) {
             clearInterval(this.fightInterval);
             this.fightInterval = null;
@@ -168,6 +190,10 @@ const Adventure = {
         this.currentMonster.health = Math.max(0, this.currentMonster.health - playerDamage);
         this.updateMonsterUI();
         
+        // 保存当前怪物状态
+        State.currentMonster = this.currentMonster;
+        Save.auto();
+        
         if (this.currentMonster.health <= 0) {
             this.monsterDefeated();
             return;
@@ -187,48 +213,57 @@ const Adventure = {
     
     onPlayerDeath() {
         this.addLog('角色死亡！', '#ff6b6b');
+        this.isDead = true;
         
-        const currentIndex = Areas.areas.findIndex(a => a.id === this.currentAreaId);
-        
-        if (currentIndex > 0) {
-            const previousArea = Areas.areas[currentIndex - 1];
-            this.currentAreaId = previousArea.id;
-            Areas.currentArea = previousArea.id;
-            State.currentRegion = previousArea.name;
-            this.addLog(`返回 ${previousArea.name}！`, '#ff6b6b');
-        } else {
-            this.addLog(`在池塘复活！`, '#ff6b6b');
+        const hpBar = document.getElementById('adventurePlayerHpBar');
+        if (hpBar) {
+            hpBar.style.background = '#ccc';
+            hpBar.style.filter = 'grayscale(100%)';
         }
         
-        this.killCount = 0;
-        this.bossKilled = false;
-        
-        Character.currentHealth = Character.maxHealth;
-        this.addLog(`自动复活，满血继续战斗！`, '#4CAF50');
-        
-        this.updatePlayerUI();
-        this.updateAreaSelect();
-        UI.update();
-        Save.auto();
+        this.stopAutoFight();
         
         setTimeout(() => {
-            if (this.isAutoFighting) {
-                this.spawnMonster();
+            const currentIndex = Areas.areas.findIndex(a => a.id === this.currentAreaId);
+            
+            if (currentIndex > 0) {
+                const previousArea = Areas.areas[currentIndex - 1];
+                this.currentAreaId = previousArea.id;
+                Areas.currentArea = previousArea.id;
+                State.currentRegion = previousArea.name;
+                this.addLog(`返回 ${previousArea.name}！`, '#ff6b6b');
+            } else {
+                this.addLog(`在池塘复活！`, '#ff6b6b');
             }
-        }, 1000);
+            
+            this.killCount = 0;
+            this.bossKilled = false;
+            
+            Character.currentHealth = Character.maxHealth;
+            this.isDead = false;
+            this.addLog(`自动复活，满血继续战斗！`, '#4CAF50');
+            
+            this.updatePlayerUI();
+            this.updateAreaSelect();
+            UI.update();
+            Save.auto();
+            
+            setTimeout(() => {
+                this.startAutoFight();
+            }, 500);
+        }, 3000);
     },
     
     monsterDefeated() {
         const monster = this.currentMonster;
         
         if (!monster || monster.health > 0) {
-            console.log('monsterDefeated skipped - monster already defeated or null');
             return;
         }
         
-        console.log('monsterDefeated - monster:', monster.name, 'isBoss:', monster.isBoss, 'killCount:', this.killCount);
-        
         this.currentMonster = null;
+        State.currentMonster = null; // 清除保存的怪物
+        Save.auto();
         
         Character.gainExperience(monster.experience);
         State.coins = Math.min(State.coins + monster.gold, Config.MAX_COINS);
@@ -263,9 +298,11 @@ const Adventure = {
             const area = Areas.areas.find(a => a.id === this.currentAreaId);
             if (area) {
                 const equipment = Equipment.generateSetEquipment(this.currentAreaId);
-                if (equipment && State.equipmentBackpack.length < Config.MAX_EQUIPMENT) {
-                    State.equipmentBackpack.push(equipment);
-                    this.addLog(`获得装备：${equipment.name}！`, '#ffd700');
+                if (equipment) {
+                    const result = Equipment.addToBackpack(equipment);
+                    if (result.success) {
+                        this.addLog(`获得装备：${equipment.name}！`, '#ffd700');
+                    }
                 }
             }
         }
@@ -294,15 +331,10 @@ const Adventure = {
     },
     
     advanceToNextArea() {
-        console.log('=== advanceToNextArea called ===');
-        console.trace('Stack trace:');
-        
         const currentIndex = Areas.areas.findIndex(a => a.id === this.currentAreaId);
-        console.log('advanceToNextArea - currentIndex:', currentIndex, 'currentAreaId:', this.currentAreaId);
         
         if (currentIndex < Areas.areas.length - 1) {
             const nextArea = Areas.areas[currentIndex + 1];
-            console.log('nextArea:', nextArea.id, 'isUnlocked:', nextArea.isUnlocked);
             
             nextArea.isUnlocked = true;
             this.currentAreaId = nextArea.id;
@@ -349,7 +381,12 @@ const Adventure = {
         document.getElementById('adventurePlayerHp').textContent = Character.currentHealth;
         document.getElementById('adventurePlayerMaxHp').textContent = Character.maxHealth;
         const hpPercent = (Character.currentHealth / Character.maxHealth) * 100;
-        document.getElementById('adventurePlayerHpBar').style.width = hpPercent + '%';
+        const hpBar = document.getElementById('adventurePlayerHpBar');
+        hpBar.style.width = hpPercent + '%';
+        if (!this.isDead) {
+            hpBar.style.background = 'linear-gradient(90deg, #4CAF50, #45a049)';
+            hpBar.style.filter = 'none';
+        }
     },
     
     updateUI() {

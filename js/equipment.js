@@ -55,48 +55,6 @@ const Equipment = {
     },
     
     equipmentPool: {
-        weapon: [
-            { name: '木棍', level: 1 },
-            { name: '铁剑', level: 5 },
-            { name: '钢剑', level: 10 },
-            { name: '火焰剑', level: 15 },
-            { name: '王者之剑', level: 20 }
-        ],
-        armor: [
-            { name: '布甲', level: 1 },
-            { name: '皮甲', level: 5 },
-            { name: '铁甲', level: 10 },
-            { name: '钢甲', level: 15 },
-            { name: '龙鳞甲', level: 20 }
-        ],
-        helmet: [
-            { name: '布帽', level: 1 },
-            { name: '皮帽', level: 5 },
-            { name: '铁盔', level: 10 },
-            { name: '钢盔', level: 15 },
-            { name: '龙首盔', level: 20 }
-        ],
-        boots: [
-            { name: '布鞋', level: 1 },
-            { name: '皮靴', level: 5 },
-            { name: '铁靴', level: 10 },
-            { name: '钢靴', level: 15 },
-            { name: '龙靴', level: 20 }
-        ],
-        gloves: [
-            { name: '布手套', level: 1 },
-            { name: '皮手套', level: 5 },
-            { name: '铁手套', level: 10 },
-            { name: '钢手套', level: 15 },
-            { name: '龙爪手套', level: 20 }
-        ],
-        pants: [
-            { name: '布裤', level: 1 },
-            { name: '皮裤', level: 5 },
-            { name: '铁裤', level: 10 },
-            { name: '钢裤', level: 15 },
-            { name: '龙鳞裤', level: 20 }
-        ],
         tool: [
             { name: '锄头', level: 1, durability: 10, value: 10 },
             { name: '捕虫网', level: 1, durability: 100, value: 15 }
@@ -113,79 +71,13 @@ const Equipment = {
         tool: '工具'
     },
     
-    // 生成装备
+    // 生成装备（仅生成工具）
     generateEquipment(areaLevel) {
-        const type = this.types[Math.floor(Math.random() * this.types.length)];
-        const pool = this.equipmentPool[type];
-        
-        const eligibleItems = pool.filter(item => item.level <= areaLevel + 5);
-        if (eligibleItems.length === 0) {
-            return null;
-        }
-        
-        const baseItem = eligibleItems[Math.floor(Math.random() * eligibleItems.length)];
-        
-        const qualityKeys = Object.keys(this.qualities);
-        const quality = qualityKeys[Math.floor(Math.random() * qualityKeys.length)];
-        const qualityData = this.qualities[quality];
-        
-        const equipment = {
-            id: Date.now() + Math.random().toString(36).substr(2, 9),
-            name: `${qualityData.name} ${baseItem.name}`,
-            type: type,
-            level: baseItem.level,
-            quality: quality,
-            value: 10
-        };
-        
-        if (type === 'tool' && baseItem.durability) {
-            equipment.durability = baseItem.durability;
-            equipment.maxDurability = baseItem.durability;
-            equipment.value = baseItem.value;
-        } else {
-            const attrType = this.attributeTypes[Math.floor(Math.random() * this.attributeTypes.length)];
-            const attrValue = this.attributeValues[baseItem.level] ? this.attributeValues[baseItem.level][attrType] : this.attributeValues[1][attrType];
-            equipment[attrType] = Math.floor(attrValue * qualityData.multiplier);
-            equipment.value = Math.floor(attrValue * qualityData.multiplier * 5);
-        }
-        
-        return equipment;
+        return null;
     },
     
     generateEquipmentWithQuality(areaLevel, fixedQuality) {
-        const type = this.types[Math.floor(Math.random() * this.types.length)];
-        const pool = this.equipmentPool[type];
-        
-        const eligibleItems = pool.filter(item => item.level <= areaLevel + 5);
-        if (eligibleItems.length === 0) {
-            return null;
-        }
-        
-        const baseItem = eligibleItems[Math.floor(Math.random() * eligibleItems.length)];
-        const quality = fixedQuality || 'common';
-        const qualityData = this.qualities[quality];
-        
-        const equipment = {
-            id: Date.now() + Math.random().toString(36).substr(2, 9),
-            name: `${qualityData.name} ${baseItem.name}`,
-            type: type,
-            level: baseItem.level,
-            quality: quality,
-            value: 10
-        };
-        
-        if (type === 'tool' && baseItem.durability) {
-            equipment.durability = baseItem.durability;
-            equipment.maxDurability = baseItem.durability;
-            equipment.value = baseItem.value;
-        } else {
-            const attrType = this.attributeTypes[Math.floor(Math.random() * this.attributeTypes.length)];
-            const attrValue = this.attributeValues[baseItem.level] ? this.attributeValues[baseItem.level][attrType] : this.attributeValues[1][attrType];
-            equipment[attrType] = Math.floor(attrValue * qualityData.multiplier);
-            equipment.value = Math.floor(attrValue * qualityData.multiplier * 5);
-        }
-        
-        return equipment;
+        return null;
     },
     
     // 获得装备品质颜色
@@ -325,7 +217,7 @@ const Equipment = {
     createHoe() {
         return {
             id: Date.now() + Math.random().toString(36).substr(2, 9),
-            name: '普通 锄头',
+            name: '锄头',
             type: 'tool',
             level: 1,
             quality: 'common',
@@ -338,7 +230,7 @@ const Equipment = {
     createBugNet() {
         return {
             id: Date.now() + Math.random().toString(36).substr(2, 9),
-            name: '普通 捕虫网',
+            name: '捕虫网',
             type: 'tool',
             level: 1,
             quality: 'common',
@@ -380,6 +272,37 @@ const Equipment = {
         equipment[attrType] = attrValue;
         
         return equipment;
+    },
+
+    generateAllSetEquipment() {
+        const allEquipment = [];
+        const typeNames = {
+            armor: '护甲',
+            helmet: '头盔',
+            boots: '鞋子',
+            gloves: '手套',
+            pants: '裤子'
+        };
+
+        Object.entries(this.setEquipment).forEach(([areaId, setData]) => {
+            setData.types.forEach(type => {
+                this.attributeTypes.forEach(attrType => {
+                    const attrValue = this.attributeValues[setData.level][attrType];
+                    allEquipment.push({
+                        id: `${areaId}_${type}_${attrType}`,
+                        name: `${setData.setName}${typeNames[type]}`,
+                        type: type,
+                        level: setData.level,
+                        quality: 'common',
+                        setName: setData.setName,
+                        [attrType]: attrValue,
+                        value: attrValue * 5
+                    });
+                });
+            });
+        });
+
+        return allEquipment;
     },
     
     getSetBonus(setName, pieceCount) {
@@ -430,5 +353,14 @@ const Equipment = {
         equipment[attrType] = attrValue;
         
         return equipment;
+    },
+
+    addToBackpack(equipment) {
+        if (!equipment) {
+            return { success: false, message: '装备不存在' };
+        }
+        
+        State.equipmentBackpack.push(equipment);
+        return { success: true, message: '装备已添加到背包' };
     }
 };

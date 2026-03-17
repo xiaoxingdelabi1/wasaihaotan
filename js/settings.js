@@ -6,11 +6,7 @@ const Settings = {
     
     init() {
         this.load();
-        try {
-            this.bindEvents();
-        } catch(e) {
-            console.error('Settings bindEvents error:', e);
-        }
+        this.bindEvents();
     },
     
     bindEvents() {

@@ -18,6 +18,7 @@ const SeasonNames = ["春", "雨", "秋", "冬"];
 const Items = {
     bug: {
         name: '虫子',
+        description: '软软胖胖的小虫子，是制作美味虫虫串的基础材料呢～',
         type: 'consumable',
         minPrice: 1,
         maxPrice: 3,
@@ -31,6 +32,7 @@ const Items = {
     },
     leaf: {
         name: '荷叶',
+        description: '翠绿翠绿的荷叶，可以用来包裹虫虫串，让它们更香哦～',
         type: 'upgrade',
         minPrice: 80,
         maxPrice: 150,
@@ -44,6 +46,7 @@ const Items = {
     },
     skewer: {
         name: '虫虫串',
+        description: '香喷喷的虫虫串，用10只小虫子和1片荷叶烤制而成，美味极了！',
         type: 'consumable',
         minPrice: 15,
         maxPrice: 45,
@@ -57,6 +60,7 @@ const Items = {
     },
     apple: {
         name: '苹果',
+        description: '红彤彤的小苹果，咬一口脆甜多汁，是补充体力的好选择～',
         type: 'consumable',
         minPrice: 3,
         maxPrice: 8,
@@ -70,6 +74,7 @@ const Items = {
     },
     banana: {
         name: '香蕉',
+        description: '弯弯的黄色小香蕉，剥开皮就能闻到香甜的味道，超好吃！',
         type: 'consumable',
         minPrice: 5,
         maxPrice: 12,
@@ -83,6 +88,7 @@ const Items = {
     },
     watermelon: {
         name: '西瓜',
+        description: '圆圆的大西瓜，切开是红红的果肉，夏天吃一口清凉解暑～',
         type: 'consumable',
         minPrice: 10,
         maxPrice: 20,
@@ -96,6 +102,7 @@ const Items = {
     },
     pepper: {
         name: '辣椒',
+        description: '红红的小辣椒，看起来可爱但吃起来超辣，能让虫虫串变得火辣辣！',
         type: 'ingredient',
         minPrice: 8,
         maxPrice: 15,
@@ -109,6 +116,7 @@ const Items = {
     },
     carrot: {
         name: '胡萝卜',
+        description: '橙橙的胡萝卜，营养丰富又好吃，小兔子最爱吃了～',
         type: 'ingredient',
         minPrice: 5,
         maxPrice: 10,
@@ -122,6 +130,7 @@ const Items = {
     },
     potato: {
         name: '土豆',
+        description: '圆圆的土豆，可以做成各种美食，是超实用的食材呢！',
         type: 'ingredient',
         minPrice: 4,
         maxPrice: 8,
@@ -135,6 +144,7 @@ const Items = {
     },
     spicySkewer: {
         name: '咻咻辣辣串',
+        description: '超辣的虫虫串！吃一口会发出"咻咻"的声音，辣得过瘾又好吃！',
         type: 'consumable',
         minPrice: 50,
         maxPrice: 100,
@@ -148,6 +158,7 @@ const Items = {
     },
     purse: {
         name: '荷包',
+        description: '精致的小荷包，可以装更多东西，让背包空间变大哦～',
         type: 'upgrade',
         minPrice: 120,
         maxPrice: 180,
@@ -161,6 +172,7 @@ const Items = {
     },
     piggyBank: {
         name: '小存钱罐',
+        description: '粉嘟嘟的小猪存钱罐，可以帮你存更多金币，超可爱的！',
         type: 'upgrade',
         minPrice: 280,
         maxPrice: 320,
@@ -174,6 +186,7 @@ const Items = {
     },
     diamond: {
         name: '钻石',
+        description: '闪闪发光的钻石，晶莹剔透超漂亮，是价值连城的宝物呢！',
         type: 'treasure',
         minPrice: 1000,
         maxPrice: 2000,
@@ -187,6 +200,7 @@ const Items = {
     },
     godFruit: {
         name: '神果',
+        description: '传说中的神奇果实，散发着金色的光芒，吃了能获得强大的力量！',
         type: 'consumable',
         minPrice: 8000,
         maxPrice: 15000,
@@ -200,6 +214,7 @@ const Items = {
     },
     dragonScale: {
         name: '龙鳞',
+        description: '从巨龙身上掉落的鳞片，坚硬无比还闪着神秘的光芒，超稀有的！',
         type: 'material',
         minPrice: 40000,
         maxPrice: 60000,
@@ -213,6 +228,7 @@ const Items = {
     },
     phoenixFeather: {
         name: '凤凰羽',
+        description: '凤凰的羽毛，燃烧着不灭的火焰，美丽又神秘，是传说中的材料！',
         type: 'material',
         minPrice: 150000,
         maxPrice: 250000,
@@ -226,6 +242,7 @@ const Items = {
     },
     dullPearl: {
         name: '暗淡的珍珠',
+        description: '虽然光泽暗淡，但依然是珍贵的珍珠，也许有一天会发光呢～',
         type: 'material',
         minPrice: 50,
         maxPrice: 100,
@@ -258,6 +275,7 @@ const Items = {
                 items.push({
                     id: key,
                     name: this[key].name,
+                    description: this[key].description,
                     type: this[key].type,
                     minPrice: this[key].minPrice,
                     maxPrice: this[key].maxPrice,

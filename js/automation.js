@@ -39,6 +39,33 @@ const Automation = {
         this.bindEvents();
         this.loadFromState();
         this.render();
+        
+        // 页面加载后，自动恢复运行中的卡片
+        this.resumeRunningCards();
+    },
+    
+    resumeRunningCards() {
+        // 查找所有标记为 active 的卡片并恢复运行
+        this.cards.forEach(card => {
+            if (card.active) {
+                // 检查是否有工具
+                if (card.toolType && !Tool.hasTool(card.toolType)) {
+                    card.active = false;
+                    this.saveToState();
+                    return;
+                }
+                
+                // 检查背包是否有空间
+                if (Backpack.canAddItem('bug', 1)) {
+                    this.startCard(card);
+                    Log.add('自动化工作台：恢复运行');
+                } else {
+                    // 背包满，启动自动恢复检查
+                    this.startAutoResume(card);
+                    Log.add('自动化工作台：背包已满，等待恢复');
+                }
+            }
+        });
     },
     
     bindEvents() {
@@ -333,7 +360,17 @@ const Automation = {
             
             if (this.runningCards[card.id].progress >= 100) {
                 this.runningCards[card.id].progress = 0;
-                State.bugs++;
+                const result = Backpack.addResource('bug', 1);
+                if (!result.success) {
+                    Log.add('背包已满，捕虫已暂停');
+                    this.stopCard(card);
+                    // 不将 active 设为 false，保持待恢复状态
+                    this.saveToState();
+                    this.updateCardStyle(cardData);
+                    // 启动自动恢复检查
+                    this.startAutoResume(card);
+                    return;
+                }
                 Log.add('捕获 1 只虫子');
             }
             
@@ -342,6 +379,26 @@ const Automation = {
         };
         
         this.runningCards[card.id].interval = setInterval(runCard, 100);
+    },
+    
+    startAutoResume(card) {
+        // 每2秒检查一次背包是否有空间
+        const checkInterval = setInterval(() => {
+            const cardData = this.cards.find(c => c.id === card.id);
+            // 如果卡片被删除或手动停止，清除检查
+            if (!cardData || !cardData.active) {
+                clearInterval(checkInterval);
+                return;
+            }
+            
+            // 检查背包是否有空间（不实际添加）
+            if (Backpack.canAddItem('bug', 1)) {
+                // 有空间了，恢复运行
+                clearInterval(checkInterval);
+                Log.add('背包有空间，捕虫恢复运行');
+                this.startCard(card);
+            }
+        }, 2000);
     },
     
     stopCard(card) {

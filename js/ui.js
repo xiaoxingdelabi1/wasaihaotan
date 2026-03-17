@@ -70,6 +70,10 @@ const UI = {
         });
         activeBtn.classList.add('active');
         activePane.classList.add('active');
+        
+        if (activePane.id === 'marketPane') {
+            Market.render('all');
+        }
     },
     
     hideAllMainPanes() {

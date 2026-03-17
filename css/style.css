@@ -187,8 +187,13 @@ main {
     white-space: nowrap;
 }
 
+.backpack-item-name {
+    color: #1565c0;
+    font-weight: 500;
+}
+
 .backpack-slot .use-btn {
-    margin-left: 2px;
+    margin-left: 1px;
     flex-shrink: 0;
     white-space: nowrap;
 }
@@ -196,14 +201,36 @@ main {
     background-color: #4CAF50;
     color: white;
     border: none;
-    border-radius: 3px;
-    padding: 2px 8px;
+    border-radius: 2px;
+    padding: 0;
     cursor: pointer;
     font-size: 12px;
+    font-weight: bold;
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
 }
+
+.backpack-slot .use-btn[data-action="sell"] {
+    background-color: #4CAF50 !important;
+}
+
+.backpack-slot .use-btn[data-action="equip"] {
+    background-color: #2196F3 !important;
+}
+
+.backpack-slot .use-btn[data-action="use"] {
+    background-color: #FF9800 !important;
+}
+
 .use-btn:hover {
-    background-color: #45a049;
+    opacity: 0.8;
 }
+
 .use-btn:disabled {
     background-color: #ccc;
     cursor: not-allowed;
@@ -347,6 +374,16 @@ main {
 .shop-item-info {
     display: flex;
     gap: 10px;
+}
+
+.shop-item-name {
+    color: #1565c0;
+    font-weight: 500;
+}
+
+.shop-item-price {
+    color: #E6B422;
+    font-weight: 500;
 }
 .buy-btn {
     background-color: #2196F3;
@@ -567,6 +604,16 @@ main {
 .stall-info span {
     white-space: nowrap;
 }
+
+.stall-item-name {
+    color: #1565c0;
+    font-weight: 500;
+}
+
+.stall-item-price {
+    color: #E6B422;
+    font-weight: 500;
+}
 .remove-stall-btn {
     background-color: #ffcccc;
     border: 1px solid #ff8888;
@@ -608,6 +655,16 @@ main {
 }
 .market-header span, .market-item span {
     text-align: left;
+}
+
+.market-item-name {
+    color: #1565c0;
+    font-weight: 500;
+}
+
+.market-item-price {
+    color: #E6B422;
+    font-weight: 500;
 }
 .market-header span:nth-child(2), .market-item span:nth-child(2) {
     text-align: center;

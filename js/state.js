@@ -35,6 +35,8 @@ const State = {
         skewer: false,
         spicySkewer: false
     },
+    autoFightPaused: true, // 默认暂停，用户需要手动开启
+    currentMonster: null, // 当前战斗的怪物
     
     logs: [],
     
@@ -143,6 +145,8 @@ const State = {
             unlockedAreas: Areas.areas.filter(a => a.isUnlocked).map(a => a.id),
             autoSellEnabled: this.autoSellEnabled,
             autoProcess: this.autoProcess,
+            autoFightPaused: this.autoFightPaused,
+            currentMonster: this.currentMonster,
             hasToaster: this.hasToaster,
             automationCards: this.automationCards || [],
             automationLinks: this.automationLinks || [],
@@ -176,7 +180,13 @@ const State = {
         this.stallItems = data.stallItems || [];
         
         if (data.marketItems && data.marketItems.length > 0) {
-            this.marketItems = data.marketItems;
+            this.marketItems = data.marketItems.map(item => {
+                const freshItem = InitialMarketItems.find(i => i.name === item.name);
+                if (freshItem) {
+                    return { ...freshItem, currentPrice: item.currentPrice };
+                }
+                return item;
+            });
             const existingNames = new Set(this.marketItems.map(item => item.name));
             const newItems = InitialMarketItems.filter(item => !existingNames.has(item.name));
             if (newItems.length > 0) {
@@ -201,6 +211,8 @@ const State = {
         this.logs = data.logs || [];
         this.autoSellEnabled = data.autoSellEnabled || false;
         this.autoProcess = data.autoProcess || { skewer: false, spicySkewer: false };
+        this.autoFightPaused = data.autoFightPaused !== undefined ? data.autoFightPaused : true;
+        this.currentMonster = data.currentMonster || null;
         this.hasToaster = data.hasToaster || false;
         this.automationCards = data.automationCards || [];
         this.automationLinks = data.automationLinks || [];
@@ -233,15 +245,12 @@ const State = {
         }
         
         if (data.unlockedAreas) {
-            console.log('Loading unlocked areas:', data.unlockedAreas);
             data.unlockedAreas.forEach(areaId => {
                 const area = Areas.areas.find(a => a.id === areaId);
                 if (area) {
                     area.isUnlocked = true;
-                    console.log('Unlocked area:', areaId);
                 }
             });
         }
-        console.log('Areas after load:', Areas.areas.map(a => ({ id: a.id, isUnlocked: a.isUnlocked })));
     }
 };

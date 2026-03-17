@@ -220,8 +220,8 @@ const Combat = {
                     if (Math.random() < 0.05) {
                         const equipment = Equipment.generateSetEquipment(currentArea.id);
                         if (equipment) {
-                            if (State.equipmentBackpack.length < Config.MAX_EQUIPMENT) {
-                                State.equipmentBackpack.push(equipment);
+                            const result = Equipment.addToBackpack(equipment);
+                            if (result.success) {
                                 Log.add(`🎉 Boss掉落了 ${equipment.name}！`);
                             } else {
                                 Log.add(`获得了 ${equipment.name}，但装备背包已满`);
@@ -487,8 +487,8 @@ const Combat = {
                     if (Math.random() < 0.05) {
                         const equipment = Equipment.generateSetEquipment(currentArea.id);
                         if (equipment) {
-                            if (State.equipmentBackpack.length < Config.MAX_EQUIPMENT) {
-                                State.equipmentBackpack.push(equipment);
+                            const result = Equipment.addToBackpack(equipment);
+                            if (result.success) {
                                 Log.add(`🎉 Boss掉落了 ${equipment.name}！`);
                             } else {
                                 Log.add(`获得了 ${equipment.name}，但装备背包已满`);

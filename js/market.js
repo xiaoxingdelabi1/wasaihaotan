@@ -1,5 +1,5 @@
 const Market = {
-    render(type) {
+    render(type = 'all') {
         const marketList = document.getElementById('marketList');
         if (!marketList) return;
         
@@ -9,9 +9,19 @@ const Market = {
         let tools = [];
         
         State.marketItems.forEach(item => {
+            let itemKey = null;
+            if (Items) {
+                for (let key in Items) {
+                    if (Items[key] && Items[key].name === item.name) {
+                        itemKey = key;
+                        break;
+                    }
+                }
+            }
+            
             const itemWithType = {
                 ...item,
-                itemType: 'marketItem',
+                itemType: itemKey || 'marketItem',
                 source: 'market',
                 quality: this.getItemQuality(item)
             };
@@ -23,54 +33,43 @@ const Market = {
             }
         });
         
-        Equipment.types.forEach(equipType => {
-            if (equipType === 'tool') return;
-            const pool = Equipment.equipmentPool[equipType];
-            if (pool) {
-                pool.forEach(baseItem => {
-                    const qualityData = Equipment.qualities[baseItem.quality] || Equipment.qualities.common;
-                    const baseValue = (baseItem.attack || 0) + (baseItem.defense || 0) + (baseItem.agility || 0);
-                    const value = Math.floor(baseValue * qualityData.multiplier * 10);
-                    equipments.push({
-                        id: `${equipType}_${baseItem.name}`,
-                        name: `${qualityData.name} ${baseItem.name}`,
-                        itemType: 'equipmentPool',
-                        source: 'drop',
-                        quality: baseItem.quality,
-                        currentPrice: value,
-                        level: baseItem.level,
-                        equipType: equipType
-                    });
-                });
-            }
-        });
+
         
         Shop.shopCategories.blacksmith.items.forEach(item => {
             tools.push({
                 id: item.id,
                 name: item.name,
-                itemType: 'blacksmithItem',
+                itemType: 'tool',
                 source: 'blacksmith',
                 quality: 'common',
                 currentPrice: item.price,
                 durability: item.durability,
+                maxDurability: item.durability,
                 type: item.type
             });
         });
         
-        State.equipmentBackpack.forEach(equip => {
-            const ownedItem = {
+        Equipment.generateAllSetEquipment().forEach(equip => {
+            const setItem = {
                 ...equip,
-                itemType: 'playerEquipment',
-                source: 'backpack',
+                itemType: 'setEquipment',
+                source: 'set',
                 quality: equip.quality || 'common',
                 currentPrice: equip.value || this.getEquipmentValue(equip)
             };
-            
+            equipments.push(setItem);
+        });
+
+        State.equipmentBackpack.forEach(equip => {
             if (equip.type === 'tool') {
+                const ownedItem = {
+                    ...equip,
+                    itemType: 'playerEquipment',
+                    source: 'backpack',
+                    quality: equip.quality || 'common',
+                    currentPrice: equip.value || this.getEquipmentValue(equip)
+                };
                 tools.push(ownedItem);
-            } else {
-                equipments.push(ownedItem);
             }
         });
         
@@ -86,6 +85,8 @@ const Market = {
         } else if (type === 'tools') {
             displayItems = tools;
         }
+        
+        this.currentDisplayItems = displayItems;
         
         if (displayItems.length === 0) {
             let emptyMsg = '市场空空，下次再来';
@@ -107,24 +108,52 @@ const Market = {
             const qualityName = this.getQualityDisplayName(item.quality);
             const qualityClass = this.getQualityClass(item.quality);
             const sourceLabel = this.getSourceLabel(item.source);
+            const showQuality = item.type !== 'tool';
             html += `
                 <div class="market-item" data-index="${index}" data-type="${item.itemType}" data-source="${item.source}">
-                    <span>${item.name}${sourceLabel}</span>
-                    <span class="${qualityClass}">${qualityName}</span>
-                    <span>${item.currentPrice} 金币</span>
+                    <span class="market-item-name">${item.name}${sourceLabel}</span>
+                    ${showQuality ? `<span class="${qualityClass}">${qualityName}</span>` : '<span></span>'}
+                    <span class="market-item-price">${item.currentPrice} 金币</span>
                 </div>
             `;
         });
         marketList.innerHTML = html;
+        
+        this.bindTooltipEvents();
     },
     
     getSourceLabel(source) {
-        const labels = {
-            'market': '',
-            'blacksmith': '',
-            'backpack': ' [背包]'
-        };
-        return labels[source] || '';
+        return '';
+    },
+    
+    bindTooltipEvents() {
+        const marketList = document.getElementById('marketList');
+        if (!marketList) return;
+        
+        // 复用背包逻辑：每次渲染重新绑定事件
+        document.querySelectorAll('.market-item').forEach(item => {
+            item.addEventListener('mouseenter', (e) => {
+                const index = parseInt(item.dataset.index);
+                const itemData = this.currentDisplayItems[index];
+                if (itemData) {
+                    const itemType = itemData.itemType || itemData.type || 'unknown';
+                    ItemTooltip.show(e.clientX, e.clientY, itemType, itemData);
+                }
+            });
+            
+            item.addEventListener('mouseleave', () => {
+                ItemTooltip.hide();
+            });
+            
+            item.addEventListener('mousemove', (e) => {
+                const index = parseInt(item.dataset.index);
+                const itemData = this.currentDisplayItems[index];
+                if (itemData) {
+                    const itemType = itemData.itemType || itemData.type || 'unknown';
+                    ItemTooltip.show(e.clientX, e.clientY, itemType, itemData);
+                }
+            });
+        });
     },
     
     getItemQuality(item) {
@@ -188,7 +217,25 @@ const Market = {
             const change = (Math.random() - 0.5) * 2 * item.volatility * State.globalVolatility;
             item.currentPrice = Math.max(item.minPrice, Math.min(item.maxPrice, Math.round(item.currentPrice + change)));
         });
-        this.render('all');
+        // 只更新价格，不重新渲染整个列表，避免闪烁
+        this.updatePricesOnly();
+    },
+    
+    updatePricesOnly() {
+        const marketList = document.getElementById('marketList');
+        if (!marketList) return;
+        
+        // 只更新价格文本，不重新渲染整个列表
+        // 使用 data-index 来匹配元素，避免通过文本内容匹配
+        this.currentDisplayItems.forEach((item, index) => {
+            const el = marketList.querySelector(`.market-item[data-index="${index}"]`);
+            if (el) {
+                const priceEl = el.querySelector('.market-item-price');
+                if (priceEl && priceEl.textContent !== `${item.currentPrice} 金币`) {
+                    priceEl.textContent = `${item.currentPrice} 金币`;
+                }
+            }
+        });
     },
     
     addItem(item) {
@@ -212,8 +259,8 @@ const Shop = {
         general: { name: '杂货铺', filter: item => !['辣椒', '胡萝卜'].includes(item.name) },
         fruit: { name: '水果铺', filter: item => ['辣椒', '胡萝卜'].includes(item.name) },
         blacksmith: { name: '铁匠铺', items: [
-            { id: 'hoe', name: '普通 锄头', price: 10, durability: 10, type: 'tool' },
-            { id: 'bugNet', name: '普通 捕虫网', price: 15, durability: 100, type: 'tool' },
+            { id: 'hoe', name: '锄头', price: 10, durability: 10, type: 'tool' },
+            { id: 'bugNet', name: '捕虫网', price: 15, durability: 100, type: 'tool' },
             { id: 'toaster', name: '烤虫机', price: 100, type: 'machine' }
         ]}
     },
@@ -260,6 +307,7 @@ const Shop = {
         });
         container.innerHTML = html;
         this.bindBuyButtons(container, 'general');
+        this.bindShopTooltipEvents(container, items);
     },
     
     renderFruitShop() {
@@ -280,6 +328,7 @@ const Shop = {
         });
         container.innerHTML = html;
         this.bindBuyButtons(container, 'fruit');
+        this.bindShopTooltipEvents(container, items);
     },
     
     renderBlacksmithShop() {
@@ -292,8 +341,8 @@ const Shop = {
             html += `
                 <div class="shop-item" data-item-id="${item.id}">
                     <div class="shop-item-info">
-                        <span>${item.name}</span>
-                        <span>价格: ${item.price} 金币</span>
+                        <span class="shop-item-name">${item.name}</span>
+                        <span class="shop-item-price">价格: ${item.price} 金币</span>
                         ${item.durability ? `<span>耐久: ${item.durability}</span>` : ''}
                     </div>
                     <button class="buy-btn" data-item-id="${item.id}" ${State.coins < item.price ? 'disabled' : ''}>购买</button>
@@ -302,13 +351,14 @@ const Shop = {
         });
         container.innerHTML = html;
         this.bindBlacksmithBuyButtons(container);
+        this.bindBlacksmithTooltipEvents(container);
     },
     
     createShopItemHTML(item, index) {
         return `
             <div class="shop-item" data-index="${index}">
                 <div class="shop-item-info">
-                    <span>${item.name}</span>
+                    <span class="shop-item-name">${item.name}</span>
                     <span>单价: ${item.price} 金币</span>
                     <span>剩余: ${item.quantity}</span>
                 </div>
@@ -331,6 +381,47 @@ const Shop = {
             btn.addEventListener('click', (e) => {
                 const itemId = e.target.dataset.itemId;
                 this.buyBlacksmithItem(itemId);
+            });
+        });
+    },
+    
+    bindShopTooltipEvents(container, items) {
+        // 复用背包逻辑：每次渲染重新绑定事件
+        container.querySelectorAll('.shop-item').forEach((el, idx) => {
+            const item = items[idx];
+            if (!item) return;
+            
+            el.addEventListener('mouseenter', (e) => {
+                ItemTooltip.show(e.clientX, e.clientY, item.type, item);
+            });
+            
+            el.addEventListener('mouseleave', () => {
+                ItemTooltip.hide();
+            });
+            
+            el.addEventListener('mousemove', (e) => {
+                ItemTooltip.show(e.clientX, e.clientY, item.type, item);
+            });
+        });
+    },
+    
+    bindBlacksmithTooltipEvents(container) {
+        // 复用背包逻辑：每次渲染重新绑定事件
+        const items = this.shopCategories.blacksmith.items;
+        container.querySelectorAll('.shop-item').forEach((el, idx) => {
+            const item = items[idx];
+            if (!item) return;
+            
+            el.addEventListener('mouseenter', (e) => {
+                ItemTooltip.show(e.clientX, e.clientY, 'tool', item);
+            });
+            
+            el.addEventListener('mouseleave', () => {
+                ItemTooltip.hide();
+            });
+            
+            el.addEventListener('mousemove', (e) => {
+                ItemTooltip.show(e.clientX, e.clientY, 'tool', item);
             });
         });
     },
@@ -368,21 +459,29 @@ const Shop = {
             alert('金币不足');
             return;
         }
-        if (State.equipmentBackpack.length >= Config.MAX_EQUIPMENT) {
-            alert('装备背包已满');
-            return;
-        }
         
         State.coins -= item.price;
         
         if (item.id === 'hoe') {
             const hoe = Equipment.createHoe();
-            State.equipmentBackpack.push(hoe);
-            Log.add(`从铁匠铺购买了普通 锄头`);
+            const result = Equipment.addToBackpack(hoe);
+            if (result.success) {
+                Log.add(`从铁匠铺购买了锄头`);
+            } else {
+                State.coins += item.price;
+                alert(result.message);
+                return;
+            }
         } else if (item.id === 'bugNet') {
             const bugNet = Equipment.createBugNet();
-            State.equipmentBackpack.push(bugNet);
-            Log.add(`从铁匠铺购买了普通 捕虫网`);
+            const result = Equipment.addToBackpack(bugNet);
+            if (result.success) {
+                Log.add(`从铁匠铺购买了捕虫网`);
+            } else {
+                State.coins += item.price;
+                alert(result.message);
+                return;
+            }
         } else if (item.id === 'toaster') {
             State.hasToaster = true;
             Log.add(`从铁匠铺购买了烤虫机，解锁自动化功能`);

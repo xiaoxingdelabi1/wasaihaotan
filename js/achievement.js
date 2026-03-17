@@ -98,17 +98,14 @@ const Achievement = {
         if (achievement.rewardItems) {
             for (const item of achievement.rewardItems) {
                 const type = ItemTypeMap[item.name];
-                if (type && !Backpack.canAddItem(type, item.count)) {
-                    alert(`背包空间不足，无法领取${item.name}！请先清理背包。`);
-                    return;
+                if (type) {
+                    const result = Backpack.addResource(type, item.count);
+                    if (!result.success) {
+                        alert(`背包空间不足，无法领取${item.name}！请先清理背包。`);
+                        return;
+                    }
                 }
             }
-            achievement.rewardItems.forEach(item => {
-                if (item.name === '荷叶') State.leaves = Math.min(State.leaves + item.count, Config.MAX_LEAVES);
-                else if (item.name === '荷包') State.purses = Math.min(State.purses + item.count, Config.MAX_PURSES);
-                else if (item.name === '小存钱罐') State.piggyBanks += item.count;
-                else if (item.name === '虫虫串') State.skewers = Math.min(State.skewers + item.count, Config.MAX_SKEWERS);
-            });
         }
         
         State.completedAchievements.push(achievementId);
@@ -126,17 +123,14 @@ const Achievement = {
         if (achievement.rewardItems) {
             for (const item of achievement.rewardItems) {
                 const type = ItemTypeMap[item.name];
-                if (type && !Backpack.canAddItem(type, item.count)) {
-                    alert(`背包空间不足，无法领取${item.name}！请先清理背包。`);
-                    return;
+                if (type) {
+                    const result = Backpack.addResource(type, item.count);
+                    if (!result.success) {
+                        alert(`背包空间不足，无法领取${item.name}！请先清理背包。`);
+                        return;
+                    }
                 }
             }
-            achievement.rewardItems.forEach(item => {
-                if (item.name === '荷叶') State.leaves = Math.min(State.leaves + item.count, Config.MAX_LEAVES);
-                else if (item.name === '荷包') State.purses = Math.min(State.purses + item.count, Config.MAX_PURSES);
-                else if (item.name === '小存钱罐') State.piggyBanks += item.count;
-                else if (item.name === '虫虫串') State.skewers = Math.min(State.skewers + item.count, Config.MAX_SKEWERS);
-            });
         }
         
         State.completedLongTermAchievements.push(achievementId);
@@ -178,7 +172,7 @@ const Achievement = {
     renderRegion() {
         const achievements = RegionAchievements[State.currentRegion] || [];
         const completedCount = achievements.filter(a => State.completedAchievements.includes(a.id)).length;
-        document.getElementById('achievementRegionTitle').textContent = `🏆 ${State.currentRegion}成就`;
+        document.getElementById('achievementRegionTitle').textContent = `${State.currentRegion}成就`;
         document.getElementById('achievementProgress').textContent = `${completedCount}/${achievements.length}`;
         
         const achievementList = document.getElementById('achievementList');

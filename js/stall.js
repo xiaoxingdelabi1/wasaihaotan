@@ -416,11 +416,11 @@ const Stall = {
                 agility: 0,
                 value: item.basePrice
             };
-            if (!Backpack.canAddItem('equipment', 1)) {
-                alert('背包空间不足，无法下架！');
+            const result = Equipment.addToBackpack(equipment);
+            if (!result.success) {
+                alert(result.message + '，无法下架！');
                 return;
             }
-            State.equipmentBackpack.push(equipment);
             State.stallItems.splice(index, 1);
             Log.add(`下架了${item.remaining}个${equipment.name}`);
         } else {
@@ -458,13 +458,14 @@ const Stall = {
             }
         });
 
+        // 检查普通背包槽位是否足够（包括装备占用的槽位）
+        const currentUsed = Backpack.getUsedSlots();
+        const equipmentSlots = equipmentToAdd.length;
+        let itemsSlots = 0;
         for (const item of itemsToAdd) {
-            if (!Backpack.canAddItem(item.type, item.amount)) {
-                alert('背包空间不足，无法全部下架！');
-                return;
-            }
+            itemsSlots += Math.ceil(item.amount / Utils.getItemCapacity(Items[item.type]?.name || item.type));
         }
-        if (equipmentToAdd.length > 0 && !Backpack.canAddItem('equipment', equipmentToAdd.length)) {
+        if (currentUsed + equipmentSlots + itemsSlots > State.backpackCapacity) {
             alert('背包空间不足，无法全部下架！');
             return;
         }
@@ -473,7 +474,7 @@ const Stall = {
             Backpack.addResource(item.type, item.amount);
         }
         equipmentToAdd.forEach(equipment => {
-            State.equipmentBackpack.push(equipment);
+            Equipment.addToBackpack(equipment);
         });
         
         State.stallItems = [];
@@ -500,9 +501,9 @@ const Stall = {
             html += `
                 <div class="stall-item" data-index="${index}">
                     <div class="stall-info">
-                        <span>${typeName}</span>
+                        <span class="stall-item-name">${typeName}</span>
                         <span>${item.remaining}/${item.total}</span>
-                        <span>售价:${item.customPrice}</span>
+                        <span class="stall-item-price">售价:${item.customPrice}</span>
                         <span>市场价:${item.basePrice}</span>
                         <span>⏳ ${remainingSeconds}秒</span>
                     </div>
@@ -511,6 +512,39 @@ const Stall = {
             `;
         });
         stallList.innerHTML = html;
+        this.bindStallTooltipEvents();
+    },
+    
+    bindStallTooltipEvents() {
+        const stallList = document.getElementById('stallList');
+        if (!stallList) return;
+        
+        // 复用背包逻辑：每次渲染重新绑定事件
+        stallList.querySelectorAll('.stall-item').forEach((el, index) => {
+            const item = State.stallItems[index];
+            if (!item) return;
+            
+            let itemType = item.type;
+            let itemData = item;
+            
+            // 如果是装备，使用装备数据
+            if (item.type.startsWith('equipment_') && item.equipmentData) {
+                itemType = 'equipment';
+                itemData = item.equipmentData;
+            }
+            
+            el.addEventListener('mouseenter', (e) => {
+                ItemTooltip.show(e.clientX, e.clientY, itemType, itemData);
+            });
+            
+            el.addEventListener('mouseleave', () => {
+                ItemTooltip.hide();
+            });
+            
+            el.addEventListener('mousemove', (e) => {
+                ItemTooltip.show(e.clientX, e.clientY, itemType, itemData);
+            });
+        });
     },
     
     updateTabLabel() {

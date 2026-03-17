@@ -13,7 +13,7 @@ const Backpack = {
         let newPurses = State.purses;
         let newPiggyBanks = State.piggyBanks;
         let newDullPearls = State.dullPearls;
-        let newEquipment = 0;
+        let newEquipment = State.equipmentBackpack.length;
         
         if (type === 'bug') newBugs += amount;
         else if (type === 'leaf') newLeaves += amount;
@@ -99,36 +99,150 @@ const Backpack = {
     },
     
     addResource(type, amount) {
-        if (type === 'bug') {
-            State.bugs = Math.min(State.bugs + amount, Config.MAX_BUGS);
-        } else if (type === 'leaf') {
-            State.leaves = Math.min(State.leaves + amount, Config.MAX_LEAVES);
-        } else if (type === 'skewer') {
-            State.skewers = Math.min(State.skewers + amount, Config.MAX_SKEWERS);
-        } else if (type === 'apple') {
-            State.apples = Math.min(State.apples + amount, 100);
-        } else if (type === 'banana') {
-            State.bananas = Math.min(State.bananas + amount, 100);
-        } else if (type === 'watermelon') {
-            State.watermelons = Math.min(State.watermelons + amount, 50);
-        } else if (type === 'pepper') {
-            State.peppers = Math.min(State.peppers + amount, 100);
-        } else if (type === 'carrot') {
-            State.carrots = Math.min(State.carrots + amount, 100);
-        } else if (type === 'potato') {
-            State.potatoes = Math.min(State.potatoes + amount, 100);
-        } else if (type === 'spicySkewer') {
-            State.spicySkewers = Math.min(State.spicySkewers + amount, 50);
-        } else if (type === 'purse') {
-            State.purses = Math.min(State.purses + amount, Config.MAX_PURSES);
-        } else if (type === 'piggyBank') {
-            State.piggyBanks += amount;
-        } else if (type === 'dullPearl') {
-            State.dullPearls = Math.min(State.dullPearls + amount, 100);
+        // 严格检查：计算添加后的总槽位数（先检查槽位，再检查单个上限）
+        const newTotal = this.calculateTotalSlotsAfterAdd(type, amount);
+        if (newTotal > State.backpackCapacity) {
+            return { success: false, message: '背包空间不足' };
         }
+        
+        // 检查单个物品上限
+        const currentAmount = this.getResourceAmount(type);
+        const maxAmount = this.getResourceMax(type);
+        if (currentAmount + amount > maxAmount) {
+            return { success: false, message: '该物品已达上限' };
+        }
+        
+        // 添加资源
+        this.setResourceAmount(type, currentAmount + amount);
+        
+        return { success: true, message: '添加成功' };
+    },
+    
+    calculateTotalSlotsAfterAdd(type, amount) {
+        // 计算添加后的每种物品数量
+        const newAmounts = {
+            'bug': State.bugs,
+            'leaf': State.leaves,
+            'skewer': State.skewers,
+            'apple': State.apples,
+            'banana': State.bananas,
+            'watermelon': State.watermelons,
+            'pepper': State.peppers,
+            'carrot': State.carrots,
+            'potato': State.potatoes,
+            'spicySkewer': State.spicySkewers,
+            'purse': State.purses,
+            'piggyBank': State.piggyBanks,
+            'dullPearl': State.dullPearls
+        };
+        
+        // 更新要添加的物品数量
+        if (newAmounts.hasOwnProperty(type)) {
+            newAmounts[type] += amount;
+        }
+        
+        // 计算总槽位数
+        const capacities = {
+            'bug': '虫子', 'leaf': '荷叶', 'skewer': '虫虫串',
+            'apple': '苹果', 'banana': '香蕉', 'watermelon': '西瓜',
+            'pepper': '辣椒', 'carrot': '胡萝卜', 'potato': '土豆',
+            'spicySkewer': '咻咻辣辣串', 'purse': '荷包', 
+            'piggyBank': '小存钱罐', 'dullPearl': '暗淡的珍珠'
+        };
+        
+        let totalSlots = 0;
+        for (const [key, count] of Object.entries(newAmounts)) {
+            if (count > 0) {
+                const itemName = capacities[key];
+                if (itemName) {
+                    const capacity = Utils.getItemCapacity(itemName);
+                    const slots = Math.ceil(count / capacity);
+                    totalSlots += slots;
+                }
+            }
+        }
+        
+        // 添加装备占用的槽位
+        const equipmentSlots = State.equipmentBackpack.length;
+        totalSlots += equipmentSlots;
+        
+        return totalSlots;
+    },
+    
+    getUsedSlots() {
+        let slots = 0;
+        if (State.bugs > 0) slots += Math.ceil(State.bugs / Utils.getItemCapacity('虫子'));
+        if (State.leaves > 0) slots += Math.ceil(State.leaves / Utils.getItemCapacity('荷叶'));
+        if (State.skewers > 0) slots += Math.ceil(State.skewers / Utils.getItemCapacity('虫虫串'));
+        if (State.apples > 0) slots += Math.ceil(State.apples / Utils.getItemCapacity('苹果'));
+        if (State.bananas > 0) slots += Math.ceil(State.bananas / Utils.getItemCapacity('香蕉'));
+        if (State.watermelons > 0) slots += Math.ceil(State.watermelons / Utils.getItemCapacity('西瓜'));
+        if (State.peppers > 0) slots += Math.ceil(State.peppers / Utils.getItemCapacity('辣椒'));
+        if (State.carrots > 0) slots += Math.ceil(State.carrots / Utils.getItemCapacity('胡萝卜'));
+        if (State.potatoes > 0) slots += Math.ceil(State.potatoes / Utils.getItemCapacity('土豆'));
+        if (State.spicySkewers > 0) slots += Math.ceil(State.spicySkewers / Utils.getItemCapacity('咻咻辣辣串'));
+        if (State.purses > 0) slots += Math.ceil(State.purses / Utils.getItemCapacity('荷包'));
+        if (State.piggyBanks > 0) slots += Math.ceil(State.piggyBanks / Utils.getItemCapacity('小存钱罐'));
+        if (State.dullPearls > 0) slots += Math.ceil(State.dullPearls / Utils.getItemCapacity('暗淡的珍珠'));
+        // 添加装备占用的槽位
+        slots += State.equipmentBackpack.length;
+        return slots;
+    },
+    
+    calculateSlots(type, amount) {
+        const capacities = {
+            'bug': '虫子', 'leaf': '荷叶', 'skewer': '虫虫串',
+            'apple': '苹果', 'banana': '香蕉', 'watermelon': '西瓜',
+            'pepper': '辣椒', 'carrot': '胡萝卜', 'potato': '土豆',
+            'spicySkewer': '咻咻辣辣串', 'purse': '荷包', 
+            'piggyBank': '小存钱罐', 'dullPearl': '暗淡的珍珠'
+        };
+        const itemName = capacities[type];
+        if (!itemName) return 0;
+        return Math.ceil(amount / Utils.getItemCapacity(itemName));
+    },
+    
+    getResourceAmount(type) {
+        const map = {
+            'bug': State.bugs, 'leaf': State.leaves, 'skewer': State.skewers,
+            'apple': State.apples, 'banana': State.bananas, 'watermelon': State.watermelons,
+            'pepper': State.peppers, 'carrot': State.carrots, 'potato': State.potatoes,
+            'spicySkewer': State.spicySkewers, 'purse': State.purses,
+            'piggyBank': State.piggyBanks, 'dullPearl': State.dullPearls
+        };
+        return map[type] || 0;
+    },
+    
+    getResourceMax(type) {
+        const map = {
+            'bug': Config.MAX_BUGS, 'leaf': Config.MAX_LEAVES, 'skewer': Config.MAX_SKEWERS,
+            'apple': 100, 'banana': 100, 'watermelon': 50,
+            'pepper': 100, 'carrot': 100, 'potato': 100,
+            'spicySkewer': 50, 'purse': Config.MAX_PURSES,
+            'piggyBank': Infinity, 'dullPearl': 100
+        };
+        return map[type] || 0;
+    },
+    
+    setResourceAmount(type, amount) {
+        if (type === 'bug') State.bugs = amount;
+        else if (type === 'leaf') State.leaves = amount;
+        else if (type === 'skewer') State.skewers = amount;
+        else if (type === 'apple') State.apples = amount;
+        else if (type === 'banana') State.bananas = amount;
+        else if (type === 'watermelon') State.watermelons = amount;
+        else if (type === 'pepper') State.peppers = amount;
+        else if (type === 'carrot') State.carrots = amount;
+        else if (type === 'potato') State.potatoes = amount;
+        else if (type === 'spicySkewer') State.spicySkewers = amount;
+        else if (type === 'purse') State.purses = amount;
+        else if (type === 'piggyBank') State.piggyBanks = amount;
+        else if (type === 'dullPearl') State.dullPearls = amount;
     },
     
     render() {
+        ItemTooltip.hide();
+        
         const backpackUsedSpan = document.getElementById('backpackUsed');
         const backpackCapacitySpan = document.getElementById('backpackCapacity');
         const backpackGrid = document.getElementById('backpackGrid');
@@ -263,22 +377,22 @@ const Backpack = {
             if (slot.type === 'leaf' || slot.type === 'purse' || slot.type === 'piggyBank' || slot.type === 'bug' || slot.type === 'skewer' || slot.type === 'apple' || slot.type === 'banana' || slot.type === 'watermelon' || slot.type === 'pepper' || slot.type === 'carrot' || slot.type === 'spicySkewer') {
                 if (slot.type === 'bug' || slot.type === 'leaf' || slot.type === 'skewer' || slot.type === 'apple' || slot.type === 'banana' || slot.type === 'watermelon' || slot.type === 'pepper' || slot.type === 'carrot' || slot.type === 'spicySkewer' || slot.type === 'purse') {
                     const totalCount = ItemManager.getCount(slot.type);
-                    buttons = `<button class="use-btn" data-index="${index}" data-type="${slot.type}" onclick="Stall.openModalForItem('${slot.type}', ${slot.count}, ${totalCount})")">售</button>`;
+                    buttons = `<button class="use-btn" data-index="${index}" data-type="item" data-action="sell" onclick="Stall.openModalForItem('${slot.type}', ${slot.count}, ${totalCount})")">售</button>`;
                 }
-                buttons += `<button class="use-btn" data-index="${index}" data-type="${slot.type}">使</button>`;
+                buttons += `<button class="use-btn" data-index="${index}" data-type="item" data-action="use">使</button>`;
             } else if (slot.type === 'equipment') {
                 const equipmentIndex = State.equipmentBackpack.indexOf(slot.item);
                 const isTool = slot.item && slot.item.type === 'tool';
                 if (!isTool) {
-                    buttons = `<button class="use-btn" data-index="${index}" data-type="equipment" data-equipment-index="${equipmentIndex}" onclick="Stall.openModalForItem('equipment', 1, 1, ${equipmentIndex})")">售</button>`;
+                    buttons = `<button class="use-btn" data-index="${index}" data-type="equipment" data-action="sell" data-equipment-index="${equipmentIndex}" onclick="Stall.openModalForItem('equipment', 1, 1, ${equipmentIndex})")">售</button>`;
                 }
-                buttons += `<button class="use-btn" data-index="${index}" data-type="equipment" data-equipment-index="${equipmentIndex}">装</button>`;
+                buttons += `<button class="use-btn" data-index="${index}" data-type="equipment" data-action="equip" data-equipment-index="${equipmentIndex}">装</button>`;
             }
             let slotInfo = '';
             if (slot.item && slot.item.type === 'tool') {
-                slotInfo = `<span>${itemName}</span><span></span>`;
+                slotInfo = `<span class="backpack-item-name">${itemName}</span><span></span>`;
             } else {
-                slotInfo = `<span>${itemName}</span><span>${slot.count}</span>`;
+                slotInfo = `<span class="backpack-item-name">${itemName}</span><span>${slot.count}</span>`;
             }
             html += `
                 <div class="backpack-slot" data-slot-index="${index}">
@@ -290,6 +404,31 @@ const Backpack = {
             `;
         });
         backpackGrid.innerHTML = html;
+        
+        document.querySelectorAll('.backpack-slot').forEach(slot => {
+            slot.addEventListener('mouseenter', (e) => {
+                const index = parseInt(slot.dataset.slotIndex);
+                const slotData = slots[index];
+                if (slotData) {
+                    // 复用 ItemTooltip，传递完整数据
+                    const itemData = slotData.item || slotData;
+                    ItemTooltip.show(e.clientX, e.clientY, slotData.type, itemData);
+                }
+            });
+            
+            slot.addEventListener('mouseleave', () => {
+                ItemTooltip.hide();
+            });
+            
+            slot.addEventListener('mousemove', (e) => {
+                const index = parseInt(slot.dataset.slotIndex);
+                const slotData = slots[index];
+                if (slotData) {
+                    const itemData = slotData.item || slotData;
+                    ItemTooltip.show(e.clientX, e.clientY, slotData.type, itemData);
+                }
+            });
+        });
 
         document.querySelectorAll('.use-btn').forEach(btn => {
             if (!btn.hasAttribute('onclick')) {

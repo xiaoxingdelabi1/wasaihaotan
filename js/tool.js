@@ -114,14 +114,21 @@ const Tool = {
     unequipTool(index) {
         if (!Character.equipment.tools || !Character.equipment.tools[index]) return;
         
-        const tool = Character.equipment.tools[index];
-        
-        if (State.equipmentBackpack.length >= Config.MAX_EQUIPMENT) {
-            alert('装备背包已满，无法卸下工具');
+        // 检查普通背包槽位是否已满（装备占用普通背包槽位）
+        const currentUsed = Backpack.getUsedSlots();
+        if (currentUsed >= State.backpackCapacity) {
+            alert('背包已满，无法卸下工具！');
             return;
         }
         
-        State.equipmentBackpack.push(tool);
+        const tool = Character.equipment.tools[index];
+        
+        const result = Equipment.addToBackpack(tool);
+        if (!result.success) {
+            alert(result.message + '，无法卸下工具');
+            return;
+        }
+        
         Character.equipment.tools.splice(index, 1);
         Log.add(`卸下了 ${tool.name}`);
         
