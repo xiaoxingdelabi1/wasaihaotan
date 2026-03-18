@@ -186,15 +186,7 @@ const ItemTooltip = {
         let html = `
             <div style="font-size: 14px; font-weight: bold; color: #333; margin-bottom: 8px;">${info.name}</div>
         `;
-        
-        if (marketPrice !== null && marketPrice !== undefined) {
-            html += `
-                <div style="font-size: 12px; color: #E6B422; margin-bottom: 4px;">
-                    <strong>市价：</strong>${marketPrice} 金币
-                </div>
-            `;
-        }
-        
+
         if (info.description) {
             html += `
                 <div style="font-size: 12px; color: #666; margin-bottom: 4px;">
@@ -202,11 +194,19 @@ const ItemTooltip = {
                 </div>
             `;
         }
-        
+
         if (info.function) {
             html += `
                 <div style="font-size: 12px; color: #4CAF50;">
                     <strong>功能：</strong>${info.function}
+                </div>
+            `;
+        }
+
+        if (marketPrice !== null && marketPrice !== undefined) {
+            html += `
+                <div style="font-size: 12px; margin-top: 8px;">
+                    <strong>市价：</strong><span style="color: #DAA520;">${marketPrice}</span> 金币
                 </div>
             `;
         }

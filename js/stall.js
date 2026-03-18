@@ -558,11 +558,11 @@ const Stall = {
     
     startSaleTimer() {
         const self = this;
-        
+
         if (State.autoSellEnabled) {
             self.doAutoSell();
         }
-        
+
         setInterval(() => {
             if (State.stallItems.length === 0 && !State.autoSellEnabled) return;
 
@@ -573,14 +573,14 @@ const Stall = {
 
                 while (item.timeRemaining <= 0) {
                     item.remaining -= 1;
-                    
+
                     const tax = Utils.calculateTax(item.customPrice);
                     const actualIncome = item.customPrice - tax;
                     State.coins = Math.min(State.coins + actualIncome, Config.MAX_COINS);
                     State.totalSoldValue += actualIncome;
 
                     const typeName = TypeNameMap[item.type] || item.type;
-                    
+
                     if (tax > 0) {
                         Log.add(`售出1个${typeName}，收入${actualIncome}金币（税${tax})`);
                     } else {
@@ -600,12 +600,14 @@ const Stall = {
                 }
             }
             if (changed) {
-                UI.update();
+                if (document.getElementById('stallModal').style.display !== 'block') {
+                    UI.update();
+                }
                 Achievement.render();
                 Save.auto();
             }
         }, 1000);
-        
+
         setInterval(() => {
             if (State.autoSellEnabled) {
                 self.doAutoSell();

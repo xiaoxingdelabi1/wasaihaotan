@@ -1,5 +1,6 @@
 const UI = {
     update() {
+        try {
         document.getElementById('coinCount').textContent = State.coins;
         document.querySelector('.resource-max').textContent = `/${Config.MAX_COINS}`;
 
@@ -48,12 +49,20 @@ const UI = {
         backpackHeader.title = `升级需${nextPurseCost}荷包`;
         
         document.getElementById('regionDisplay').textContent = `地区：${State.currentRegion}`;
-        
+
+        const repeatSelect = document.getElementById('adventureRepeatSelect');
+        if (repeatSelect) {
+            repeatSelect.value = (State.adventureRepeatCount !== undefined) ? State.adventureRepeatCount : 1;
+        }
+
         this.updateAutoProcessPane();
-        
+
         if (typeof RPGUI !== 'undefined') {
             RPGUI.updateCharacterInfo();
             RPGUI.updateEquipment();
+        }
+        } catch (e) {
+            console.error('UI update error:', e);
         }
     },
     

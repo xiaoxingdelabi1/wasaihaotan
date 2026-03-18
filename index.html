@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿<!DOCTYPE html>
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -89,14 +89,12 @@
                 <div style="display: flex; gap: 8px;">
                     <div style="flex: 1; background: transparent; border: 1px solid #e0e0e0; border-radius: 4px; padding: 6px;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                            <span style="font-weight: bold; color: #388e3c; font-size: 11px;">玩家 Lv.<span id="adventurePlayerLevel">1</span></span>
+                            <span style="font-weight: bold; color: #333; font-size: 11px;">玩家 Lv.<span id="adventurePlayerLevel">1</span></span>
                             <span id="adventurePlayerExp" style="font-size: 10px; color: #666;">0/200</span>
                         </div>
-                        <div style="background: #e0e0e0; border-radius: 3px; height: 10px; overflow: hidden; margin-bottom: 2px;">
+                        <div style="background: #e0e0e0; border-radius: 3px; height: 10px; overflow: hidden; margin-bottom: 2px; position: relative;">
                             <div id="adventurePlayerHpBar" style="background: linear-gradient(90deg, #4CAF50, #45a049); height: 100%; width: 100%; transition: width 0.3s;"></div>
-                        </div>
-                        <div style="font-size: 10px; color: #666;">
-                            HP: <span id="adventurePlayerHp">100</span>/<span id="adventurePlayerMaxHp">100</span>
+                            <span style="position: absolute; top: 50%; left: 4px; transform: translateY(-50%); font-size: 11px; color: #fff; font-weight: bold; text-shadow: 1px 1px 1px #000, -1px -1px 1px #000;"><span id="adventurePlayerHp">100</span>/<span id="adventurePlayerMaxHp">100</span></span>
                         </div>
                     </div>
                     <div style="flex: 1; background: transparent; border: 1px solid #e0e0e0; border-radius: 4px; padding: 6px;">
@@ -104,12 +102,11 @@
                             <span id="adventureMonsterName" style="font-weight: bold; color: #d32f2f; font-size: 11px;">等待战斗...</span>
                             <span id="adventureMonsterLevel" style="font-size: 10px; color: #666;"></span>
                         </div>
-                        <div style="background: #e0e0e0; border-radius: 3px; height: 10px; overflow: hidden; margin-bottom: 2px;">
+                        <div style="background: #e0e0e0; border-radius: 3px; height: 10px; overflow: hidden; margin-bottom: 2px; position: relative;">
                             <div id="adventureMonsterHpBar" style="background: linear-gradient(90deg, #ff6b6b, #ee5a5a); height: 100%; width: 100%; transition: width 0.3s;"></div>
+                            <span style="position: absolute; top: 50%; left: 4px; transform: translateY(-50%); font-size: 11px; color: #fff; font-weight: bold; text-shadow: 1px 1px 1px #000, -1px -1px 1px #000;"><span id="adventureMonsterHp">0</span>/<span id="adventureMonsterMaxHp">0</span></span>
                         </div>
-                        <div style="font-size: 10px; color: #666;">
-                            HP: <span id="adventureMonsterHp">0</span>/<span id="adventureMonsterMaxHp">0</span>
-                        </div>
+                        <div id="adventureDropPreview" style="margin-top: 6px; font-size: 10px; color: #888;"></div>
                     </div>
                 </div>
                 <div id="adventureDrops" style="margin-top: 6px; display: flex; gap: 4px; flex-wrap: wrap; min-height: 16px;">
@@ -138,28 +135,29 @@
             </div>
             <div id="marketShopPane">
                 <div style="display: flex; gap: 8px; margin-bottom: 16px;">
-                    <button class="tab-btn active" id="generalShopTab">杂货铺</button>
-                    <button class="tab-btn" id="blacksmithTab">铁匠铺</button>
-                    <button class="tab-btn" id="fruitShopTab">水果铺</button>
+                    <button class="tab-btn active" id="generalShopTab">物品</button>
+                    <button class="tab-btn" id="blacksmithTab">工具</button>
+                    <button class="tab-btn" id="fruitShopTab">道具</button>
                 </div>
                 <div id="generalShopContent" style="display: block;">
+                    <h4>物品</h4>
                     <div class="shop-list" id="marketShopList"></div>
                 </div>
                 <div id="blacksmithContent" style="display: none;">
-                    <h4>⚒️ 铁匠铺</h4>
+                    <h4>工具</h4>
                     <div class="shop-list" id="blacksmithShopList">
-                        <div style="color:#999; padding:4px;">出售武器和盔甲</div>
+                        <div style="color:#999; padding:4px;">出售工具和机器</div>
                     </div>
                 </div>
                 <div id="fruitShopContent" style="display: none;">
-                    <h4>🍎 水果铺</h4>
+                    <h4>道具</h4>
                     <div class="shop-list" id="fruitShopList">
-                        <div style="color:#999; padding:4px;">出售水果和食材</div>
+                        <div style="color:#999; padding:4px;">出售食材和升级道具</div>
                     </div>
                 </div>
             </div>
             <div id="hotelPane">
-                <div class="hotel-title">🏠 借宿</div>
+                <div class="hotel-title">借宿</div>
                 <p>在这里休息一晚，可以恢复精力，并让时间推进到次日早上8:00。</p>
                 <p>借宿费用：100 金币</p>
                 <button class="hotel-btn" id="hotelStayBtn">借宿过夜</button>
@@ -247,7 +245,25 @@
                         padding: 8px;
                         background: #f9f9f9;
                         border-radius: 4px;
-                        min-height: 40px;
+                        min-height: 20px;
+                    }
+                    .equipment-slot-content .use-btn {
+                        margin-top: 4px;
+                        margin-right: 4px;
+                    }
+                    .equipment-btn-row {
+                        display: flex;
+                        flex-direction: row;
+                        gap: 4px;
+                        flex-wrap: wrap;
+                    }
+                    .equipment-btn-row .use-btn {
+                        margin-top: 4px;
+                        margin-right: 0;
+                        width: auto !important;
+                        height: auto !important;
+                        min-width: auto !important;
+                        padding: 4px 8px !important;
                     }
                 </style>
             </div>

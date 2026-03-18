@@ -32,6 +32,13 @@ const Achievement = {
         if (achievement.itemType === 'equipBugNet') {
             return Tool.hasTool('捕虫网');
         }
+        if (achievement.itemType === 'areaMonsterKill') {
+            const area = achievement.area;
+            return (State.areaKillCount[area] || 0) >= achievement.count;
+        }
+        if (achievement.itemType === 'dullPearl') {
+            return State.dullPearls >= achievement.count;
+        }
         let currentCount = 0;
         if (achievement.itemType === 'bug') currentCount = State.bugs;
         else if (achievement.itemType === 'leaf') currentCount = State.leaves;
@@ -70,6 +77,13 @@ const Achievement = {
         }
         if (achievement.itemType === 'equipBugNet') {
             return Tool.hasTool('捕虫网') ? 1 : 0;
+        }
+        if (achievement.itemType === 'areaMonsterKill') {
+            const area = achievement.area;
+            return State.areaKillCount[area] || 0;
+        }
+        if (achievement.itemType === 'dullPearl') {
+            return State.dullPearls;
         }
         if (achievement.itemType === 'bug') return State.bugs;
         if (achievement.itemType === 'leaf') return State.leaves;

@@ -6,12 +6,12 @@ const Adventure = {
     fightInterval: null,
     killCount: 0,
     bossKilled: false,
-    repeatCount: 1,
-    currentRepeatCount: 0,
+    miniBossKilled: {},
     
     init() {
         this.currentAreaId = Areas.currentArea || 'pond';
         this.bindEvents();
+        this.updateAreaSelect();
         
         // 恢复保存的怪物状态
         if (State.currentMonster) {
@@ -44,7 +44,10 @@ const Adventure = {
                 this.currentAreaId = areaId;
                 Areas.currentArea = areaId;
                 State.currentRegion = area.name;
-                this.currentRepeatCount = 0;
+                State.adventureCurrentRepeatCount = 0;
+                if (typeof Achievement !== 'undefined') {
+                    Achievement.renderRegion();
+                }
                 if (this.isAutoFighting) {
                     this.stopAutoFight();
                     this.startAutoFight();
@@ -56,35 +59,54 @@ const Adventure = {
         });
         
         document.getElementById('adventureRepeatSelect').addEventListener('change', (e) => {
-            this.repeatCount = parseInt(e.target.value);
-            this.currentRepeatCount = 0;
+            State.adventureRepeatCount = parseInt(e.target.value);
+            State.adventureCurrentRepeatCount = 0;
+            Save.auto();
         });
+
+        const repeatSelect = document.getElementById('adventureRepeatSelect');
+        if (repeatSelect) {
+            repeatSelect.value = (State.adventureRepeatCount !== undefined) ? State.adventureRepeatCount : 1;
+        }
     },
     
     startAutoFight() {
         if (Character.isDead()) {
             this.addLog('角色已死亡，请恢复血量！', '#ff6b6b');
-            Settings.checkAutoHeal();
+            if (Settings.autoHeal) {
+                this.autoHealUntil80();
+            }
             return;
         }
-        
+
+        if (Settings.autoHeal) {
+            const healthPercent = (Character.currentHealth / Character.maxHealth) * 100;
+            if (healthPercent < 80) {
+                this.addLog('血量低于80%，自动恢复中...', '#4CAF50');
+                this.autoHealUntil80();
+                return;
+            }
+        }
+
         this.isAutoFighting = true;
         State.autoFightPaused = false; // 保存状态：正在战斗
         Save.auto();
-        
+
         const btn = document.getElementById('autoFightBtn');
         btn.textContent = '||';
         btn.classList.add('active');
-        
+
         this.killCount = 0;
         this.bossKilled = false;
-        this.currentRepeatCount = 0;
-        
+        State.adventureCurrentRepeatCount = 0;
+
+        this.updateAreaSelect();
+
         const repeatSelect = document.getElementById('adventureRepeatSelect');
         if (repeatSelect) {
-            this.repeatCount = parseInt(repeatSelect.value);
+            State.adventureRepeatCount = parseInt(repeatSelect.value);
         }
-        
+
         // 如果没有保存的怪物，才生成新怪物
         if (!this.currentMonster) {
             this.spawnMonster();
@@ -111,25 +133,50 @@ const Adventure = {
         document.getElementById('adventureMonsterHp').textContent = '0';
         document.getElementById('adventureMonsterMaxHp').textContent = '0';
         document.getElementById('adventureMonsterHpBar').style.width = '0%';
+        document.getElementById('adventureDropPreview').textContent = '';
     },
     
     spawnMonster() {
         const area = Areas.areas.find(a => a.id === this.currentAreaId);
         if (!area || !area.monsters || area.monsters.length === 0) return;
-        
-        // 检查是否需要生成 BOSS（每 10 只怪物生成一个 BOSS）
-        if (this.killCount > 0 && this.killCount % 10 === 0 && !this.bossKilled) {
+
+        const areaMiniBosses = area.miniBosses || [];
+        const areaBoss = area.boss;
+
+        if (!this.miniBossKilled[this.currentAreaId]) {
+            this.miniBossKilled[this.currentAreaId] = [];
+        }
+        const killedMiniBosses = this.miniBossKilled[this.currentAreaId];
+
+        if (areaBoss && killedMiniBosses.length >= 3 && !this.bossKilled) {
             this.spawnBoss(area);
             return;
         }
-        
+
+        if (this.killCount > 0 && this.killCount % 20 === 0 && killedMiniBosses.length < 3) {
+            const availableMiniBosses = areaMiniBosses.filter(mb => !killedMiniBosses.includes(mb));
+            if (availableMiniBosses.length > 0) {
+                const miniBossType = availableMiniBosses[Math.floor(Math.random() * availableMiniBosses.length)];
+                const baseMiniBoss = Monsters.getMonsterInfo(miniBossType);
+                if (baseMiniBoss) {
+                    const miniBoss = JSON.parse(JSON.stringify(baseMiniBoss));
+                    miniBoss.type = miniBossType;
+                    miniBoss.maxHealth = miniBoss.health;
+                    this.currentMonster = miniBoss;
+                    this.updateMonsterUI();
+                    this.addLog(`⚠️ 小BOSS出现：${miniBoss.name}！`, '#ff6600');
+                    return;
+                }
+            }
+        }
+
         const monsterType = area.monsters[Math.floor(Math.random() * area.monsters.length)];
         const baseMonster = Monsters.getMonsterInfo(monsterType);
         if (!baseMonster) return;
-        
+
         const monster = JSON.parse(JSON.stringify(baseMonster));
         monster.maxHealth = monster.health;
-        
+
         if (this.currentAreaId === 'castle' && !monster.isBoss && Math.random() < 0.3) {
             monster.name = `精英 ${monster.name}`;
             monster.health = Math.floor(monster.health * 1.5);
@@ -140,23 +187,24 @@ const Adventure = {
             monster.gold = Math.floor(monster.gold * 2);
             monster.isElite = true;
         }
-        
+
         this.currentMonster = monster;
         this.updateMonsterUI();
         this.addLog(`遭遇 ${monster.name}！`, '#ff6b6b');
     },
     
     spawnBoss(area) {
-        const bossType = area.monsters[area.monsters.length - 1]; // 使用该地区最后一个怪物作为 BOSS 基础
+        const bossType = area.boss;
         const baseMonster = Monsters.getMonsterInfo(bossType);
         if (!baseMonster) {
             this.bossKilled = true;
             this.spawnMonster();
             return;
         }
-        
+
         const boss = JSON.parse(JSON.stringify(baseMonster));
-        boss.name = `BOSS - ${boss.name}`;
+        boss.type = bossType;
+        boss.name = `大BOSS - ${boss.name}`;
         boss.health = Math.floor(boss.health * 3);
         boss.maxHealth = boss.health;
         boss.attack = Math.floor(boss.attack * 2);
@@ -164,7 +212,7 @@ const Adventure = {
         boss.experience = Math.floor(boss.experience * 5);
         boss.gold = Math.floor(boss.gold * 5);
         boss.isBoss = true;
-        
+
         this.currentMonster = boss;
         this.updateMonsterUI();
         this.addLog(`⚠️ BOSS 战！${boss.name} 出现了！`, '#ff0000');
@@ -214,72 +262,178 @@ const Adventure = {
     onPlayerDeath() {
         this.addLog('角色死亡！', '#ff6b6b');
         this.isDead = true;
-        
+
         const hpBar = document.getElementById('adventurePlayerHpBar');
         if (hpBar) {
             hpBar.style.background = '#ccc';
             hpBar.style.filter = 'grayscale(100%)';
         }
-        
+
         this.stopAutoFight();
-        
-        setTimeout(() => {
+
+        if (Settings.autoHeal) {
+            this.addLog('自动恢复中...', '#4CAF50');
+            setTimeout(() => {
+                this.autoHealUntil80();
+            }, 3000);
+        } else {
+            setTimeout(() => {
+                const currentIndex = Areas.areas.findIndex(a => a.id === this.currentAreaId);
+
+                if (currentIndex > 0) {
+                    const previousArea = Areas.areas[currentIndex - 1];
+                    this.currentAreaId = previousArea.id;
+                    Areas.currentArea = previousArea.id;
+                    State.currentRegion = previousArea.name;
+                    this.addLog(`返回 ${previousArea.name}！`, '#ff6b6b');
+                } else {
+                    this.addLog(`在池塘复活！`, '#ff6b6b');
+                }
+
+                this.killCount = 0;
+                this.bossKilled = false;
+                this.miniBossKilled[this.currentAreaId] = [];
+                State.currentMonster = null;
+                this.currentMonster = null;
+                State.adventureCurrentRepeatCount = 0;
+
+                Character.currentHealth = Character.maxHealth;
+                this.isDead = false;
+                this.addLog(`自动复活，满血继续战斗！`, '#4CAF50');
+
+                this.updatePlayerUI();
+                this.updateAreaSelect();
+                UI.update();
+                if (typeof Achievement !== 'undefined') {
+                    Achievement.renderRegion();
+                }
+                Save.auto();
+
+                setTimeout(() => {
+                    this.startAutoFight();
+                }, 500);
+            }, 3000);
+        }
+    },
+
+    autoHealUntil80() {
+        const targetHealthPercent = 80;
+
+        if (Character.currentHealth >= Character.maxHealth * targetHealthPercent / 100) {
+            this.isDead = false;
+            this.addLog(`生命值已恢复到80%以上！`, '#4CAF50');
+
             const currentIndex = Areas.areas.findIndex(a => a.id === this.currentAreaId);
-            
+
             if (currentIndex > 0) {
                 const previousArea = Areas.areas[currentIndex - 1];
                 this.currentAreaId = previousArea.id;
                 Areas.currentArea = previousArea.id;
                 State.currentRegion = previousArea.name;
-                this.addLog(`返回 ${previousArea.name}！`, '#ff6b6b');
+                this.addLog(`返回 ${previousArea.name}重新开始！`, '#ff6b6b');
             } else {
-                this.addLog(`在池塘复活！`, '#ff6b6b');
+                this.addLog(`在池塘复活重新开始！`, '#ff6b6b');
             }
-            
+
             this.killCount = 0;
             this.bossKilled = false;
-            
+            this.miniBossKilled[this.currentAreaId] = [];
+            State.currentMonster = null;
+            this.currentMonster = null;
+
             Character.currentHealth = Character.maxHealth;
-            this.isDead = false;
-            this.addLog(`自动复活，满血继续战斗！`, '#4CAF50');
-            
             this.updatePlayerUI();
             this.updateAreaSelect();
             UI.update();
+            if (typeof Achievement !== 'undefined') {
+                Achievement.renderRegion();
+            }
             Save.auto();
-            
             setTimeout(() => {
                 this.startAutoFight();
             }, 500);
-        }, 3000);
+            return;
+        }
+
+        const healItems = [
+            { type: 'spicySkewer', name: '咻咻辣辣串', heal: 500, count: () => State.spicySkewers },
+            { type: 'skewer', name: '虫虫串', heal: 150, count: () => State.skewers },
+            { type: 'bug', name: '虫子', heal: 10, count: () => State.bugs }
+        ];
+
+        let healed = false;
+        for (const item of healItems) {
+            if (item.count() > 0) {
+                Backpack.useItem(item.type);
+                healed = true;
+                break;
+            }
+        }
+
+        if (healed) {
+            this.updatePlayerUI();
+            UI.update();
+            setTimeout(() => {
+                this.autoHealUntil80();
+            }, 30);
+        } else {
+            this.addLog('没有回血道具，需要手动恢复！', '#ff6b6b');
+            const currentIndex = Areas.areas.findIndex(a => a.id === this.currentAreaId);
+            if (currentIndex > 0) {
+                const previousArea = Areas.areas[currentIndex - 1];
+                this.currentAreaId = previousArea.id;
+                Areas.currentArea = previousArea.id;
+                State.currentRegion = previousArea.name;
+                this.addLog(`返回 ${previousArea.name}进行恢复...`, '#ff6b6b');
+            } else {
+                this.addLog(`在池塘等待恢复...`, '#ff6b6b');
+            }
+            this.updateAreaSelect();
+            UI.update();
+        }
     },
     
     monsterDefeated() {
         const monster = this.currentMonster;
-        
+
         if (!monster || monster.health > 0) {
             return;
         }
-        
+
         this.currentMonster = null;
-        State.currentMonster = null; // 清除保存的怪物
+        State.currentMonster = null;
         Save.auto();
-        
+
         Character.gainExperience(monster.experience);
         State.coins = Math.min(State.coins + monster.gold, Config.MAX_COINS);
         State.monsterKillCount++;
-        
-        if (monster.isBoss) {
+
+        if (monster.isMiniBoss) {
+            if (!this.miniBossKilled[this.currentAreaId]) {
+                this.miniBossKilled[this.currentAreaId] = [];
+            }
+            if (!this.miniBossKilled[this.currentAreaId].includes(monster.type)) {
+                this.miniBossKilled[this.currentAreaId].push(monster.type);
+            }
+            this.addLog(`🎉 击败小BOSS ${monster.name}！(${this.miniBossKilled[this.currentAreaId].length}/3)`, '#ff6600');
+            this.killCount++;
+        } else if (monster.isBoss) {
             this.bossKilled = true;
-            this.addLog(`🎉 击败了 ${monster.name}！解锁新地区！`, '#ffd700');
-            
-            setTimeout(() => this.advanceToNextArea(), 500);
+            State.adventureCurrentRepeatCount++;
+            this.addLog(`🎉 击败大BOSS ${monster.name}！(${State.adventureCurrentRepeatCount}/${State.adventureRepeatCount})`, '#ffd700');
+
+            if (State.adventureRepeatCount > 0 && State.adventureCurrentRepeatCount >= State.adventureRepeatCount) {
+                this.addLog(`已完成 ${State.adventureRepeatCount} 次，前往下一地区！`, '#4CAF50');
+                State.adventureCurrentRepeatCount = 0;
+                setTimeout(() => this.advanceToNextArea(), 500);
+            } else {
+                setTimeout(() => this.advanceToNextArea(), 500);
+            }
             return;
+        } else {
+            this.killCount++;
         }
-        
-        this.killCount++;
-        this.currentRepeatCount++;
-        
+
         if (monster.drops && monster.drops.length > 0) {
             monster.drops.forEach(drop => {
                 if (Math.random() < drop.chance) {
@@ -293,8 +447,9 @@ const Adventure = {
                 }
             });
         }
-        
-        if (Math.random() < 0.02 && !monster.isElite) {
+
+        const dropChance = monster.isBoss ? 0.05 : (monster.isMiniBoss ? 0.02 : 0);
+        if (dropChance > 0 && Math.random() < dropChance) {
             const area = Areas.areas.find(a => a.id === this.currentAreaId);
             if (area) {
                 const equipment = Equipment.generateSetEquipment(this.currentAreaId);
@@ -306,7 +461,7 @@ const Adventure = {
                 }
             }
         }
-        
+
         this.updatePlayerUI();
         UI.update();
         Save.auto();
@@ -315,14 +470,7 @@ const Adventure = {
         if (Settings.autoHeal || healthPercent < 80) {
             Settings.checkAutoHeal(healthPercent < 80);
         }
-        
-        if (this.repeatCount > 0 && this.currentRepeatCount >= this.repeatCount) {
-            this.addLog(`已完成 ${this.repeatCount} 次，前往下一地区！`, '#4CAF50');
-            this.currentRepeatCount = 0;
-            setTimeout(() => this.advanceToNextArea(), 500);
-            return;
-        }
-        
+
         setTimeout(() => {
             if (this.isAutoFighting) {
                 this.spawnMonster();
@@ -332,24 +480,27 @@ const Adventure = {
     
     advanceToNextArea() {
         const currentIndex = Areas.areas.findIndex(a => a.id === this.currentAreaId);
-        
+
         if (currentIndex < Areas.areas.length - 1) {
             const nextArea = Areas.areas[currentIndex + 1];
-            
+
             nextArea.isUnlocked = true;
             this.currentAreaId = nextArea.id;
             Areas.currentArea = nextArea.id;
             State.currentRegion = nextArea.name;
             this.addLog(`→ 前进到 ${nextArea.name}！`, '#4CAF50');
-            
+
             this.killCount = 0;
             this.bossKilled = false;
-            this.currentRepeatCount = 0;
-            
+            State.adventureCurrentRepeatCount = 0;
+
             this.updateAreaSelect();
             UI.update();
+            if (typeof Achievement !== 'undefined') {
+                Achievement.renderRegion();
+            }
             Save.auto();
-            
+
             setTimeout(() => {
                 if (this.isAutoFighting) {
                     this.spawnMonster();
@@ -358,8 +509,9 @@ const Adventure = {
         } else {
             this.addLog(`🏆 已通关所有地区！继续挑战...`, '#ffd700');
             this.bossKilled = false;
+            this.miniBossKilled[this.currentAreaId] = [];
             this.killCount = 0;
-            this.currentRepeatCount = 0;
+            State.adventureCurrentRepeatCount = 0;
             setTimeout(() => this.spawnMonster(), 500);
         }
     },
@@ -373,6 +525,35 @@ const Adventure = {
         document.getElementById('adventureMonsterMaxHp').textContent = m.maxHealth;
         const hpPercent = Math.max(0, (m.health / m.maxHealth) * 100);
         document.getElementById('adventureMonsterHpBar').style.width = hpPercent + '%';
+
+        const dropPreview = document.getElementById('adventureDropPreview');
+        let htmlParts = [];
+
+        if (m.drops && m.drops.length > 0) {
+            const dropHtml = m.drops.map(d => {
+                const dropType = ItemTypeMap[d.name];
+                const itemData = dropType ? Items[dropType] : null;
+                let color = '#888';
+                if (itemData) {
+                    if (itemData.type === 'tool' || itemData.type === 'equipment') {
+                        color = '#1565c0';
+                    } else if (itemData.type === 'consumable' || itemData.type === 'ingredient' || itemData.type === 'material') {
+                        color = '#4CAF50';
+                    }
+                }
+                return `<span style="color: ${color};">${d.name}</span>`;
+            }).join(' ');
+            htmlParts.push(`掉落: ${dropHtml}`);
+        }
+
+        if (m.isBoss || m.isMiniBoss) {
+            const setData = Equipment.setEquipment[this.currentAreaId];
+            if (setData) {
+                htmlParts.push(`<span style="color: #1565c0;">${setData.setName}套装</span>`);
+            }
+        }
+
+        dropPreview.innerHTML = htmlParts.length > 0 ? htmlParts.join(' | ') : '';
     },
     
     updatePlayerUI() {
@@ -405,18 +586,18 @@ const Adventure = {
     updateAreaSelect() {
         const select = document.getElementById('adventureAreaSelect');
         if (!select) return;
-        
+
+        const currentArea = this.currentAreaId;
         select.innerHTML = '';
         Areas.areas.forEach(area => {
             const option = document.createElement('option');
             option.value = area.id;
             option.textContent = `${area.name} (Lv.${area.level})`;
             option.disabled = !area.isUnlocked;
-            if (area.id === this.currentAreaId) {
-                option.selected = true;
-            }
             select.appendChild(option);
         });
+
+        select.value = currentArea;
     },
     
     addLog(message, color = '#ccc') {

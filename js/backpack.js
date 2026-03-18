@@ -377,14 +377,14 @@ const Backpack = {
             if (slot.type === 'leaf' || slot.type === 'purse' || slot.type === 'piggyBank' || slot.type === 'bug' || slot.type === 'skewer' || slot.type === 'apple' || slot.type === 'banana' || slot.type === 'watermelon' || slot.type === 'pepper' || slot.type === 'carrot' || slot.type === 'spicySkewer') {
                 if (slot.type === 'bug' || slot.type === 'leaf' || slot.type === 'skewer' || slot.type === 'apple' || slot.type === 'banana' || slot.type === 'watermelon' || slot.type === 'pepper' || slot.type === 'carrot' || slot.type === 'spicySkewer' || slot.type === 'purse') {
                     const totalCount = ItemManager.getCount(slot.type);
-                    buttons = `<button class="use-btn" data-index="${index}" data-type="item" data-action="sell" onclick="Stall.openModalForItem('${slot.type}', ${slot.count}, ${totalCount})")">售</button>`;
+                    buttons = `<button class="use-btn" data-index="${index}" data-type="item" data-action="sell" onclick="Stall.openModalForItem('${slot.type}', ${slot.count}, ${totalCount})">售</button>`;
                 }
                 buttons += `<button class="use-btn" data-index="${index}" data-type="item" data-action="use">使</button>`;
             } else if (slot.type === 'equipment') {
                 const equipmentIndex = State.equipmentBackpack.indexOf(slot.item);
                 const isTool = slot.item && slot.item.type === 'tool';
                 if (!isTool) {
-                    buttons = `<button class="use-btn" data-index="${index}" data-type="equipment" data-action="sell" data-equipment-index="${equipmentIndex}" onclick="Stall.openModalForItem('equipment', 1, 1, ${equipmentIndex})")">售</button>`;
+                    buttons = `<button class="use-btn" data-index="${index}" data-type="equipment" data-action="sell" data-equipment-index="${equipmentIndex}" onclick="Stall.openModalForItem('equipment', 1, 1, ${equipmentIndex})">售</button>`;
                 }
                 buttons += `<button class="use-btn" data-index="${index}" data-type="equipment" data-action="equip" data-equipment-index="${equipmentIndex}">装</button>`;
             }
@@ -433,9 +433,10 @@ const Backpack = {
         document.querySelectorAll('.use-btn').forEach(btn => {
             if (!btn.hasAttribute('onclick')) {
                 btn.addEventListener('click', (e) => {
-                    const type = e.target.dataset.type;
+                    const target = e.currentTarget;
+                    const type = target.dataset.type;
                     if (type === 'equipment') {
-                        const equipmentIndex = parseInt(e.target.dataset.equipmentIndex);
+                        const equipmentIndex = parseInt(target.dataset.equipmentIndex);
                         this.equipFromBackpack(equipmentIndex);
                     } else {
                         this.useItem(type);
@@ -491,7 +492,7 @@ const Backpack = {
                 return;
             }
             State.bugs--;
-            const healAmount = 1;
+            const healAmount = 10;
             Character.heal(healAmount);
             Log.add(`使用虫子，恢复了 ${healAmount} 点生命值`);
             UI.update();
@@ -506,7 +507,7 @@ const Backpack = {
                 return;
             }
             State.skewers--;
-            const healAmount = 15;
+            const healAmount = 150;
             Character.heal(healAmount);
             Log.add(`使用虫虫串，恢复了 ${healAmount} 点生命值`);
             UI.update();
@@ -548,7 +549,7 @@ const Backpack = {
                 return;
             }
             State.spicySkewers--;
-            const healAmount = 50;
+            const healAmount = 500;
             Character.heal(healAmount);
             Log.add(`使用咻咻辣辣串，恢复了 ${healAmount} 点生命值`);
             UI.update();

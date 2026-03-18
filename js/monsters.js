@@ -3,8 +3,8 @@ const Monsters = {
         frog: {
             name: '巡塘小虾精',
             level: 1,
-            health: 30,
-            attack: 5,
+            health: 20,
+            attack: 3,
             defense: 0,
             experience: 10,
             gold: 1,
@@ -15,8 +15,8 @@ const Monsters = {
         fish: {
             name: '盘丝小蜘蛛',
             level: 2,
-            health: 35,
-            attack: 6,
+            health: 25,
+            attack: 4,
             defense: 0,
             experience: 15,
             gold: 1,
@@ -27,8 +27,8 @@ const Monsters = {
         bug: {
             name: '水底蜈蚣精',
             level: 3,
-            health: 45,
-            attack: 8,
+            health: 35,
+            attack: 6,
             defense: 1,
             experience: 20,
             gold: 1,
@@ -130,12 +130,174 @@ const Monsters = {
             experience: 200,
             gold: 1
         },
-        
+
+        pond_miniboss_1: {
+            name: '水草精',
+            level: 2,
+            health: 40,
+            attack: 5,
+            defense: 1,
+            experience: 30,
+            gold: 3,
+            isMiniBoss: true,
+            drops: [
+                { name: '虫子', chance: 0.4 },
+                { name: '暗淡的珍珠', chance: 0.15 }
+            ]
+        },
+        pond_miniboss_2: {
+            name: '莲藕怪',
+            level: 3,
+            health: 50,
+            attack: 7,
+            defense: 2,
+            experience: 40,
+            gold: 3,
+            isMiniBoss: true,
+            drops: [
+                { name: '虫子', chance: 0.5 },
+                { name: '暗淡的珍珠', chance: 0.2 }
+            ]
+        },
+        pond_miniboss_3: {
+            name: '泥潭怪',
+            level: 4,
+            health: 70,
+            attack: 9,
+            defense: 2,
+            experience: 50,
+            gold: 3,
+            isMiniBoss: true,
+            drops: [
+                { name: '暗淡的珍珠', chance: 0.3 }
+            ]
+        },
+
+        forest_miniboss_1: {
+            name: '藤蔓精',
+            level: 5,
+            health: 120,
+            attack: 16,
+            defense: 4,
+            experience: 60,
+            gold: 3,
+            isMiniBoss: true,
+            drops: [
+                { name: '暗淡的珍珠', chance: 0.3 }
+            ]
+        },
+        forest_miniboss_2: {
+            name: '毒蘑菇',
+            level: 6,
+            health: 140,
+            attack: 18,
+            defense: 5,
+            experience: 70,
+            gold: 3,
+            isMiniBoss: true,
+            drops: [
+                { name: '暗淡的珍珠', chance: 0.35 }
+            ]
+        },
+        forest_miniboss_3: {
+            name: '古树精',
+            level: 7,
+            health: 180,
+            attack: 22,
+            defense: 6,
+            experience: 80,
+            gold: 3,
+            isMiniBoss: true,
+            drops: [
+                { name: '暗淡的珍珠', chance: 0.4 }
+            ]
+        },
+
+        cave_miniboss_1: {
+            name: '石像鬼',
+            level: 9,
+            health: 200,
+            attack: 25,
+            defense: 8,
+            experience: 100,
+            gold: 3,
+            isMiniBoss: true,
+            drops: [
+                { name: '暗淡的珍珠', chance: 0.5 }
+            ]
+        },
+        cave_miniboss_2: {
+            name: '毒蝙蝠王',
+            level: 10,
+            health: 250,
+            attack: 30,
+            defense: 10,
+            experience: 120,
+            gold: 3,
+            isMiniBoss: true,
+            drops: [
+                { name: '暗淡的珍珠', chance: 0.6 }
+            ]
+        },
+        cave_miniboss_3: {
+            name: '钟乳石怪',
+            level: 11,
+            health: 300,
+            attack: 35,
+            defense: 12,
+            experience: 150,
+            gold: 3,
+            isMiniBoss: true,
+            drops: [
+                { name: '暗淡的珍珠', chance: 0.7 }
+            ]
+        },
+
+        castle_miniboss_1: {
+            name: '黑暗骑士',
+            level: 14,
+            health: 400,
+            attack: 50,
+            defense: 20,
+            experience: 180,
+            gold: 3,
+            isMiniBoss: true,
+            drops: [
+                { name: '暗淡的珍珠', chance: 0.7 }
+            ]
+        },
+        castle_miniboss_2: {
+            name: '诅咒法师',
+            level: 16,
+            health: 450,
+            attack: 60,
+            defense: 25,
+            experience: 200,
+            gold: 3,
+            isMiniBoss: true,
+            drops: [
+                { name: '暗淡的珍珠', chance: 0.8 }
+            ]
+        },
+        castle_miniboss_3: {
+            name: '堕落天使',
+            level: 18,
+            health: 500,
+            attack: 80,
+            defense: 30,
+            experience: 250,
+            gold: 3,
+            isMiniBoss: true,
+            drops: [
+                { name: '暗淡的珍珠', chance: 0.9 }
+            ]
+        },
+
         pond_boss: {
             name: '池塘霸主·水蛇王',
             level: 3,
-            health: 80,
-            attack: 12,
+            health: 60,
+            attack: 8,
             defense: 2,
             experience: 80,
             gold: 5,

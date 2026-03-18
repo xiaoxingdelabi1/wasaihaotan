@@ -334,19 +334,20 @@ const Automation = {
     
     startCard(card) {
         if (this.runningCards[card.id]) return;
-        
+
         this.runningCards[card.id] = {
             progress: 0,
-            interval: null
+            interval: null,
+            lastUpdate: 0
         };
-        
+
         const runCard = () => {
             const cardData = this.cards.find(c => c.id === card.id);
             if (!cardData || !cardData.active) {
                 this.stopCard(card);
                 return;
             }
-            
+
             if (!Tool.hasTool(cardData.toolType)) {
                 Log.add(cardData.toolType + ' 已卸下，停止运行');
                 this.stopCard(card);
@@ -355,30 +356,41 @@ const Automation = {
                 this.updateCardStyle(cardData);
                 return;
             }
-            
+
             this.runningCards[card.id].progress += 10;
-            
+
             if (this.runningCards[card.id].progress >= 100) {
                 this.runningCards[card.id].progress = 0;
                 const result = Backpack.addResource('bug', 1);
                 if (!result.success) {
                     Log.add('背包已满，捕虫已暂停');
                     this.stopCard(card);
-                    // 不将 active 设为 false，保持待恢复状态
                     this.saveToState();
                     this.updateCardStyle(cardData);
-                    // 启动自动恢复检查
                     this.startAutoResume(card);
                     return;
                 }
                 Log.add('捕获 1 只虫子');
+                UI.update();
             }
-            
-            this.updateCardStyle(cardData);
-            UI.update();
         };
-        
+
+        const updateVisuals = (timestamp) => {
+            if (!this.runningCards[card.id]) return;
+
+            if (timestamp - this.runningCards[card.id].lastUpdate >= 100) {
+                this.updateCardStyle(this.cards.find(c => c.id === card.id));
+                this.runningCards[card.id].lastUpdate = timestamp;
+            }
+
+            if (this.runningCards[card.id] && this.runningCards[card.id].active !== false) {
+                requestAnimationFrame(updateVisuals);
+            }
+        };
+
         this.runningCards[card.id].interval = setInterval(runCard, 100);
+        this.runningCards[card.id].lastUpdate = 0;
+        requestAnimationFrame(updateVisuals);
     },
     
     startAutoResume(card) {

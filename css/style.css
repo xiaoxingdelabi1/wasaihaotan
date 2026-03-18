@@ -382,7 +382,7 @@ main {
 }
 
 .shop-item-price {
-    color: #E6B422;
+    color: #DAA520;
     font-weight: 500;
 }
 .buy-btn {
@@ -611,7 +611,7 @@ main {
 }
 
 .stall-item-price {
-    color: #E6B422;
+    color: #DAA520;
     font-weight: 500;
 }
 .remove-stall-btn {
@@ -663,7 +663,7 @@ main {
 }
 
 .market-item-price {
-    color: #E6B422;
+    color: #DAA520;
     font-weight: 500;
 }
 .market-header span:nth-child(2), .market-item span:nth-child(2) {

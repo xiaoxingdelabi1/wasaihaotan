@@ -18,14 +18,14 @@ const SeasonNames = ["春", "雨", "秋", "冬"];
 const Items = {
     bug: {
         name: '虫子',
-        description: '软软胖胖的小虫子，是制作美味虫虫串的基础材料呢～',
+        description: '软软胖胖的小虫子，可恢复10点生命值，也是制作美味虫虫串的基础材料呢～',
         type: 'consumable',
         minPrice: 1,
         maxPrice: 3,
         currentPrice: 1,
         volatility: 1,
         capacity: 60,
-        properties: { heal: 1 },
+        properties: { heal: 10 },
         inMarket: true,
         inShop: true,
         shopQuantity: 5
@@ -52,7 +52,7 @@ const Items = {
         maxPrice: 45,
         currentPrice: 25,
         volatility: 5,
-        capacity: 10,
+        capacity: 60,
         properties: { heal: 15 },
         inMarket: true,
         inShop: true,
@@ -108,7 +108,7 @@ const Items = {
         maxPrice: 15,
         currentPrice: 10,
         volatility: 3,
-        capacity: 10,
+        capacity: 60,
         properties: {},
         inMarket: true,
         inShop: true,
@@ -332,13 +332,29 @@ const RegionAchievements = {
         { id: 'pond_10', name: '池塘之王', desc: '击败池塘霸主·水蛇王', itemType: 'bossKill', bossArea: 'pond', count: 1, rewardCoins: 1000, rewardItems: [{ name: '荷叶', count: 5 }, { name: '荷包', count: 2 }] }
     ],
     '森林': [
-        { id: 'forest_1', name: '森林探索者', desc: '提交20只虫子', itemType: 'bug', count: 20, rewardCoins: 100, rewardItems: [] },
-        { id: 'forest_2', name: '森林商人', desc: '提交50只虫子', itemType: 'bug', count: 50, rewardCoins: 300, rewardItems: [{ name: '荷叶', count: 3 }] },
-        { id: 'forest_3', name: '串虫大师', desc: '提交20个虫虫串', itemType: 'skewer', count: 20, rewardCoins: 800, rewardItems: [{ name: '荷包', count: 2 }] }
+        { id: 'forest_1', name: '森林探索者', desc: '在森林击败10只怪物', itemType: 'areaMonsterKill', area: 'forest', count: 10, rewardCoins: 100, rewardItems: [] },
+        { id: 'forest_2', name: '森林猎人', desc: '在森林击败30只怪物', itemType: 'areaMonsterKill', area: 'forest', count: 30, rewardCoins: 300, rewardItems: [{ name: '荷叶', count: 3 }] },
+        { id: 'forest_3', name: '森林征服者', desc: '击败森林之王·黑熊精', itemType: 'bossKill', bossArea: 'forest', count: 1, rewardCoins: 1000, rewardItems: [{ name: '荷包', count: 2 }, { name: '荷叶', count: 5 }] },
+        { id: 'forest_4', name: '珍珠收集者', desc: '收集20个暗淡的珍珠', itemType: 'dullPearl', count: 20, rewardCoins: 200, rewardItems: [{ name: '荷叶', count: 2 }] },
+        { id: 'forest_5', name: '森林食神', desc: '制作30个料理', itemType: 'skewer', count: 30, rewardCoins: 500, rewardItems: [{ name: '荷叶', count: 3 }] },
+        { id: 'forest_6', name: '森林霸主', desc: '在森林击败50只怪物', itemType: 'areaMonsterKill', area: 'forest', count: 50, rewardCoins: 800, rewardItems: [{ name: '荷包', count: 3 }] }
     ],
-    '沼泽': [
-        { id: 'swamp_1', name: '沼泽行者', desc: '提交100只虫子', itemType: 'bug', count: 100, rewardCoins: 500, rewardItems: [{ name: '荷叶', count: 5 }] },
-        { id: 'swamp_2', name: '沼泽大亨', desc: '提交50个虫虫串', itemType: 'skewer', count: 50, rewardCoins: 2000, rewardItems: [{ name: '荷包', count: 5 }] }
+    '山洞': [
+        { id: 'cave_1', name: '山洞初探', desc: '在山洞击败10只怪物', itemType: 'areaMonsterKill', area: 'cave', count: 10, rewardCoins: 200, rewardItems: [] },
+        { id: 'cave_2', name: '山洞勇者', desc: '在山洞击败30只怪物', itemType: 'areaMonsterKill', area: 'cave', count: 30, rewardCoins: 500, rewardItems: [{ name: '荷叶', count: 5 }] },
+        { id: 'cave_3', name: '山洞领主', desc: '击败山洞领主·蛟龙', itemType: 'bossKill', bossArea: 'cave', count: 1, rewardCoins: 1500, rewardItems: [{ name: '荷包', count: 3 }, { name: '荷叶', count: 5 }] },
+        { id: 'cave_4', name: '珍珠猎人', desc: '收集30个暗淡的珍珠', itemType: 'dullPearl', count: 30, rewardCoins: 400, rewardItems: [{ name: '荷叶', count: 3 }] },
+        { id: 'cave_5', name: '山洞探险家', desc: '在山洞击败50只怪物', itemType: 'areaMonsterKill', area: 'cave', count: 50, rewardCoins: 1000, rewardItems: [{ name: '荷包', count: 2 }] },
+        { id: 'cave_6', name: '山洞大亨', desc: '制作50个料理', itemType: 'skewer', count: 50, rewardCoins: 800, rewardItems: [{ name: '荷叶', count: 5 }] }
+    ],
+    '城堡': [
+        { id: 'castle_1', name: '城堡入侵者', desc: '在城堡击败10只怪物', itemType: 'areaMonsterKill', area: 'castle', count: 10, rewardCoins: 500, rewardItems: [] },
+        { id: 'castle_2', name: '城堡战士', desc: '在城堡击败30只怪物', itemType: 'areaMonsterKill', area: 'castle', count: 30, rewardCoins: 1000, rewardItems: [{ name: '荷叶', count: 5 }] },
+        { id: 'castle_3', name: '城堡征服者', desc: '击败城堡主宰·魔王', itemType: 'bossKill', bossArea: 'castle', count: 1, rewardCoins: 3000, rewardItems: [{ name: '荷包', count: 5 }, { name: '荷叶', count: 10 }] },
+        { id: 'castle_4', name: '珍珠收藏家', desc: '收集50个暗淡的珍珠', itemType: 'dullPearl', count: 50, rewardCoins: 800, rewardItems: [{ name: '荷叶', count: 5 }] },
+        { id: 'castle_5', name: '城堡探险家', desc: '在城堡击败80只怪物', itemType: 'areaMonsterKill', area: 'castle', count: 80, rewardCoins: 2000, rewardItems: [{ name: '荷包', count: 3 }] },
+        { id: 'castle_6', name: '终极食神', desc: '制作80个料理', itemType: 'skewer', count: 80, rewardCoins: 1500, rewardItems: [{ name: '荷叶', count: 10 }] },
+        { id: 'castle_7', name: '魔王克星', desc: '在城堡击败100只怪物', itemType: 'areaMonsterKill', area: 'castle', count: 100, rewardCoins: 3000, rewardItems: [{ name: '荷包', count: 5 }, { name: '荷叶', count: 10 }] }
     ]
 };
 

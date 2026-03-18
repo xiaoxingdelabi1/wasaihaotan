@@ -97,7 +97,7 @@ const Market = {
             } else if (type === 'props') {
                 emptyMsg = '暂无道具，请稍后再来';
             } else if (type === 'tools') {
-                emptyMsg = '暂无工具，可从铁匠铺购买';
+                emptyMsg = '暂无工具，可从工具店购买';
             }
             marketList.innerHTML = `<div style="color:#999; padding:8px; text-align:center;">${emptyMsg}</div>`;
             return;
@@ -256,9 +256,9 @@ const Market = {
 
 const Shop = {
     shopCategories: {
-        general: { name: '杂货铺', filter: item => !['辣椒', '胡萝卜'].includes(item.name) },
-        fruit: { name: '水果铺', filter: item => ['辣椒', '胡萝卜'].includes(item.name) },
-        blacksmith: { name: '铁匠铺', items: [
+        general: { name: '物品', filter: item => !['辣椒', '胡萝卜', '荷叶', '荷包', '小存钱罐'].includes(item.name) },
+        fruit: { name: '道具', filter: item => ['辣椒', '胡萝卜', '荷叶', '荷包', '小存钱罐'].includes(item.name) },
+        blacksmith: { name: '工具', items: [
             { id: 'hoe', name: '锄头', price: 10, durability: 10, type: 'tool' },
             { id: 'bugNet', name: '捕虫网', price: 15, durability: 100, type: 'tool' },
             { id: 'toaster', name: '烤虫机', price: 100, type: 'machine' }
@@ -342,7 +342,7 @@ const Shop = {
                 <div class="shop-item" data-item-id="${item.id}">
                     <div class="shop-item-info">
                         <span class="shop-item-name">${item.name}</span>
-                        <span class="shop-item-price">价格: ${item.price} 金币</span>
+                        <span>价格: <span class="shop-item-price">${item.price}</span> 金币</span>
                         ${item.durability ? `<span>耐久: ${item.durability}</span>` : ''}
                     </div>
                     <button class="buy-btn" data-item-id="${item.id}" ${State.coins < item.price ? 'disabled' : ''}>购买</button>
@@ -359,7 +359,7 @@ const Shop = {
             <div class="shop-item" data-index="${index}">
                 <div class="shop-item-info">
                     <span class="shop-item-name">${item.name}</span>
-                    <span>单价: ${item.price} 金币</span>
+                    <span>单价: <span class="shop-item-price">${item.price}</span> 金币</span>
                     <span>剩余: ${item.quantity}</span>
                 </div>
                 <button class="buy-btn" data-index="${index}" ${item.quantity <= 0 ? 'disabled' : ''}>购买</button>
@@ -466,7 +466,7 @@ const Shop = {
             const hoe = Equipment.createHoe();
             const result = Equipment.addToBackpack(hoe);
             if (result.success) {
-                Log.add(`从铁匠铺购买了锄头`);
+                Log.add(`从工具店购买了锄头`);
             } else {
                 State.coins += item.price;
                 alert(result.message);
@@ -476,7 +476,7 @@ const Shop = {
             const bugNet = Equipment.createBugNet();
             const result = Equipment.addToBackpack(bugNet);
             if (result.success) {
-                Log.add(`从铁匠铺购买了捕虫网`);
+                Log.add(`从工具店购买了捕虫网`);
             } else {
                 State.coins += item.price;
                 alert(result.message);
@@ -484,7 +484,7 @@ const Shop = {
             }
         } else if (item.id === 'toaster') {
             State.hasToaster = true;
-            Log.add(`从铁匠铺购买了烤虫机，解锁自动化功能`);
+            Log.add(`从工具店购买了烤虫机，解锁自动化功能`);
         }
         
         State.shopBuyCount++;

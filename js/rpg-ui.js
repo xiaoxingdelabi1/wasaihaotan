@@ -42,19 +42,19 @@ const RPGUI = {
     // 更新装备信息
     updateEquipment() {
         const equipment = Character.equipment;
-        
+
         Object.keys(equipment).forEach(slot => {
             const element = document.getElementById(`${slot}Slot`);
-            if (element) {
+            if (element && element.parentElement) {
                 if (equipment[slot]) {
                     const item = equipment[slot];
                     const qualityColor = Equipment.getQualityColor(item.quality);
                     const refineLevel = item.refineLevel || 0;
                     const refineDisplay = refineLevel > 0 ? ` +${refineLevel}` : '';
                     const canRefine = Equipment.canRefine(item);
-                    const refineBtn = canRefine ? 
+                    const refineBtn = canRefine ?
                         `<button class="use-btn" style="margin-top: 4px; background-color: #9c27b0;" onclick="RPGUI.showRefineModalForEquipped('${slot}')">精炼</button>` : '';
-                    
+
                     let statsHtml = '';
                     if (item.health) statsHtml += `生命: +${item.health}<br>`;
                     if (item.defense) statsHtml += `防御: +${item.defense}<br>`;
@@ -64,21 +64,23 @@ const RPGUI = {
                     if (item.monsterDamage) statsHtml += `怪物伤害: +${item.monsterDamage}%<br>`;
                     if (item.dodge) statsHtml += `闪避: +${item.dodge}%<br>`;
                     if (item.durability) statsHtml += `耐久: ${item.durability}<br>`;
-                    
+
                     element.innerHTML = `
                         <div style="color: ${qualityColor};">${item.name}${refineDisplay}</div>
                         <div style="font-size: 12px; margin-top: 4px;">
                             ${statsHtml}
                         </div>
-                        <button class="use-btn" style="margin-top: 8px;" onclick="RPGUI.unequipItem('${slot}')">取下</button>
-                        ${refineBtn}
+                        <div class="equipment-btn-row">
+                            <button class="use-btn" onclick="RPGUI.unequipItem('${slot}')">取下</button>
+                            ${refineBtn}
+                        </div>
                     `;
                 } else {
                     element.innerHTML = '<span>未装备</span>';
                 }
             }
         });
-        
+
         this.updateSetBonusDisplay();
     },
     
@@ -441,8 +443,20 @@ const RPGUI = {
                     
                     let dropsText = '';
                     if (baseBoss.drops && baseBoss.drops.length > 0) {
-                        const dropStrings = baseBoss.drops.map(d => `${d.name}(${Math.round(d.chance * 100)}%)`);
-                        dropsText = `<div style="color: #FF5722;">掉落: ${dropStrings.join(', ')}</div>`;
+                        const dropHtml = baseBoss.drops.map(d => {
+                            const dropType = ItemTypeMap[d.name];
+                            const itemData = dropType ? Items[dropType] : null;
+                            let color = '#888';
+                            if (itemData) {
+                                if (itemData.type === 'tool' || itemData.type === 'equipment') {
+                                    color = '#1565c0';
+                                } else if (itemData.type === 'consumable' || itemData.type === 'ingredient' || itemData.type === 'material') {
+                                    color = '#4CAF50';
+                                }
+                            }
+                            return `<span style="color: ${color};">${d.name}</span>`;
+                        }).join(' ');
+                        dropsText = `<div style="color: #FF5722;">掉落: ${dropHtml}</div>`;
                     }
                     
                     html += `
@@ -487,8 +501,20 @@ const RPGUI = {
                         
                         let dropsText = '';
                         if (baseMonster.drops && baseMonster.drops.length > 0) {
-                            const dropStrings = baseMonster.drops.map(d => `${d.name}(${Math.round(d.chance * 100)}%)`);
-                            dropsText = `<div style="color: #2196F3;">掉落: ${dropStrings.join(', ')}</div>`;
+                            const dropHtml = baseMonster.drops.map(d => {
+                                const dropType = ItemTypeMap[d.name];
+                                const itemData = dropType ? Items[dropType] : null;
+                                let color = '#888';
+                                if (itemData) {
+                                    if (itemData.type === 'tool' || itemData.type === 'equipment') {
+                                        color = '#1565c0';
+                                    } else if (itemData.type === 'consumable' || itemData.type === 'ingredient' || itemData.type === 'material') {
+                                        color = '#4CAF50';
+                                    }
+                                }
+                                return `<span style="color: ${color};">${d.name}</span>`;
+                            }).join(' ');
+                            dropsText = `<div style="color: #2196F3;">掉落: ${dropHtml}</div>`;
                         }
                         
                         html += `
@@ -585,6 +611,9 @@ const RPGUI = {
                     RPGUI.renderAreaMonsters();
                     RPGUI.updateAreaList();
                     UI.update();
+                    if (typeof Achievement !== 'undefined') {
+                        Achievement.renderRegion();
+                    }
                     Save.auto();
                 }
             });

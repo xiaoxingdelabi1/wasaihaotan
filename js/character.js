@@ -54,8 +54,8 @@ const Character = {
         this.vitality = 12;      // 影响生命值
         
         // 战斗属性
-        this.maxHealth = 100;
-        this.currentHealth = 100;
+        this.maxHealth = 200;
+        this.currentHealth = 200;
         this.attack = 20;
         this.defense = 5;
         this.criticalChance = 5;  // 百分比

@@ -46,7 +46,9 @@ const State = {
     defeatedMonsters: {},
     areaKillCount: {},
     bossDefeated: {},
-    
+    adventureRepeatCount: 1,
+    adventureCurrentRepeatCount: 0,
+
     startTimestamp: Date.now(),
     initialDays: 4.0,
     lastDayNumber: 5,
@@ -95,6 +97,8 @@ const State = {
         this.defeatedMonsters = {};
         this.areaKillCount = {};
         this.bossDefeated = {};
+        this.adventureRepeatCount = 1;
+        this.adventureCurrentRepeatCount = 0;
         this.startTimestamp = Date.now();
         this.initialDays = 4.0;
         this.lastDayNumber = 5;
@@ -138,6 +142,8 @@ const State = {
             areaKillCount: this.areaKillCount,
             bossDefeated: this.bossDefeated,
             bossKillCount: this.bossKillCount,
+            adventureRepeatCount: this.adventureRepeatCount,
+            adventureCurrentRepeatCount: this.adventureCurrentRepeatCount,
             logs: this.logs,
             maxCoins: Config.MAX_COINS,
             character: Character.getInfo(),
@@ -208,6 +214,8 @@ const State = {
         this.areaKillCount = data.areaKillCount || {};
         this.bossDefeated = data.bossDefeated || {};
         this.bossKillCount = data.bossKillCount || {};
+        this.adventureRepeatCount = (data.adventureRepeatCount !== undefined) ? data.adventureRepeatCount : 1;
+        this.adventureCurrentRepeatCount = (data.adventureCurrentRepeatCount !== undefined) ? data.adventureCurrentRepeatCount : 0;
         this.logs = data.logs || [];
         this.autoSellEnabled = data.autoSellEnabled || false;
         this.autoProcess = data.autoProcess || { skewer: false, spicySkewer: false };

@@ -7,6 +7,8 @@ const Areas = {
             level: 1,
             description: '宁静的池塘，适合新手练级',
             monsters: ['frog', 'fish', 'bug'],
+            miniBosses: ['pond_miniboss_1', 'pond_miniboss_2', 'pond_miniboss_3'],
+            boss: 'pond_boss',
             requiredLevel: 1,
             requiredAchievements: [],
             isUnlocked: true
@@ -17,6 +19,8 @@ const Areas = {
             level: 2,
             description: '茂密的森林，有更多危险的怪物',
             monsters: ['wolf', 'bear', 'goblin'],
+            miniBosses: ['forest_miniboss_1', 'forest_miniboss_2', 'forest_miniboss_3'],
+            boss: 'forest_boss',
             requiredLevel: 3,
             requiredAchievements: ['pond_3'],
             isUnlocked: false
@@ -27,6 +31,8 @@ const Areas = {
             level: 10,
             description: '黑暗的山洞，充满了强大的怪物',
             monsters: ['goblin_leader', 'troll', 'dragon'],
+            miniBosses: ['cave_miniboss_1', 'cave_miniboss_2', 'cave_miniboss_3'],
+            boss: 'cave_boss',
             requiredLevel: 8,
             requiredAchievements: ['forest_3'],
             isUnlocked: false
@@ -37,6 +43,8 @@ const Areas = {
             level: 15,
             description: '古老的城堡，最终的挑战',
             monsters: ['knight', 'wizard', 'demon'],
+            miniBosses: ['castle_miniboss_1', 'castle_miniboss_2', 'castle_miniboss_3'],
+            boss: 'castle_boss',
             requiredLevel: 12,
             requiredAchievements: ['cave_3'],
             isUnlocked: false
@@ -80,11 +88,15 @@ const Areas = {
             alert('该地区未解锁');
             return false;
         }
-        
+
         this.currentArea = areaId;
         State.currentRegion = area.name;
         Log.add(`移动到 ${area.name}`);
         UI.update();
+
+        if (typeof Achievement !== 'undefined') {
+            Achievement.renderRegion();
+        }
         return true;
     },
     
