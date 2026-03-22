@@ -78,6 +78,31 @@ const ItemManager = {
     
     hasItem(type, minCount = 1) {
         return this.getCount(type) >= minCount;
+    },
+
+    register(id, config) {
+        const defaultConfig = {
+            name: id,
+            description: '',
+            type: 'consumable',
+            minPrice: 1,
+            maxPrice: 10,
+            currentPrice: 5,
+            volatility: 1,
+            capacity: 60,
+            properties: {},
+            inMarket: true,
+            inShop: true,
+            shopQuantity: 3
+        };
+        Items[id] = { ...defaultConfig, ...config };
+        return Items[id];
+    },
+
+    registerMultiple(itemsJson) {
+        for (let id in itemsJson) {
+            this.register(id, itemsJson[id]);
+        }
     }
 };
 

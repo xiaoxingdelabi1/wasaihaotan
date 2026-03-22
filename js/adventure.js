@@ -405,7 +405,7 @@ const Adventure = {
         Save.auto();
 
         Character.gainExperience(monster.experience);
-        State.coins = Math.min(State.coins + monster.gold, Config.MAX_COINS);
+        Currency.addWen(monster.gold);
         State.monsterKillCount++;
 
         if (monster.isMiniBoss) {

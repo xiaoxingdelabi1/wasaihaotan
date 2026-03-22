@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -23,11 +23,39 @@
     </header>
 
     <main>
+        <nav class="navbar">
+            <button class="navbar-toggle" id="navbarToggle" title="折叠导航栏" onclick="Game.toggleNavbar()">
+                <span class="toggle-icon">&lt;</span>
+            </button>
+            <div class="nav-item active" data-page="overview" data-title="概览">
+                <span class="nav-icon">概</span>
+                <span class="nav-text">概览</span>
+            </div>
+            <div class="nav-item" data-page="market" data-title="集市">
+                <span class="nav-icon">集</span>
+                <span class="nav-text">集市</span>
+            </div>
+            <div class="nav-item" data-page="achievement" data-title="成就">
+                <span class="nav-icon">成</span>
+                <span class="nav-text">成就</span>
+            </div>
+            <div class="nav-item" data-page="backpack" data-title="背包">
+                <span class="nav-icon">背</span>
+                <span class="nav-text">背包</span>
+            </div>
+            <div class="nav-item" data-page="bonus" data-title="加成">
+                <span class="nav-icon">加</span>
+                <span class="nav-text">加成</span>
+            </div>
+        </nav>
+
         <aside class="left-sidebar">
-            <div class="resource-item">
-                <span class="resource-name">金币</span>
-                <span class="resource-value" id="coinCount">0</span>
-                <span class="resource-max">/1000</span>
+            <div class="resource-item currency-display">
+                <span class="currency-unit"><span id="cakeCount">0</span>饼</span>
+                <span class="currency-unit"><span id="goldCount">0</span>金</span>
+                <span class="currency-unit"><span id="silverCount">0</span>银</span>
+                <span class="currency-unit"><span id="copperCount">0</span>铜</span>
+                <span class="currency-unit"><span id="wenCount">0</span>文</span>
             </div>
             <div id="backpackContainer">
                 <div style="display: flex; gap: 8px; margin-bottom: 8px;">
@@ -67,7 +95,8 @@
             </div>
         </aside>
 
-        <div style="flex: 1; min-width: 400px; display: flex; flex-direction: column; gap: 8px;">
+        <div class="page-container">
+            <div class="page-panel active" id="overviewPage">
             <div id="adventureBar" style="border: 1px solid #cccccc; padding: 8px; border-radius: 2px; background-color: #ffffff;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                     <div style="display: flex; align-items: center; gap: 10px;">
@@ -116,7 +145,6 @@
             <section class="main-content">
             <div class="tab-bar">
                 <a href="#" id="tabAll">食材收集</a> ·
-                <a href="#" id="tabMarketShop">集市</a> ·
                 <a href="#" id="tabEquipment">装备</a> ·
                 <a href="#" id="tabProcess">自动化</a> ·
                 <a href="#" id="tabTool">工具</a> ·
@@ -132,29 +160,6 @@
             </div>
             <div id="stallBackpackPane">
                 <div class="backpack-main-grid" id="stallBackpackGrid"></div>
-            </div>
-            <div id="marketShopPane">
-                <div style="display: flex; gap: 8px; margin-bottom: 16px;">
-                    <button class="tab-btn active" id="generalShopTab">物品</button>
-                    <button class="tab-btn" id="blacksmithTab">工具</button>
-                    <button class="tab-btn" id="fruitShopTab">道具</button>
-                </div>
-                <div id="generalShopContent" style="display: block;">
-                    <h4>物品</h4>
-                    <div class="shop-list" id="marketShopList"></div>
-                </div>
-                <div id="blacksmithContent" style="display: none;">
-                    <h4>工具</h4>
-                    <div class="shop-list" id="blacksmithShopList">
-                        <div style="color:#999; padding:4px;">出售工具和机器</div>
-                    </div>
-                </div>
-                <div id="fruitShopContent" style="display: none;">
-                    <h4>道具</h4>
-                    <div class="shop-list" id="fruitShopList">
-                        <div style="color:#999; padding:4px;">出售食材和升级道具</div>
-                    </div>
-                </div>
             </div>
             <div id="hotelPane">
                 <div class="hotel-title">借宿</div>
@@ -369,6 +374,347 @@
         </section>
         </div>
 
+        <div class="page-panel" id="achievementPage">
+            <div class="page-content">
+                <h3>成就系统</h3>
+                <div class="achievement-tabs">
+                    <button class="tab-btn active" id="regionAchievementTab">地区成就</button>
+                    <button class="tab-btn" id="longTermAchievementTab">长期成就</button>
+                </div>
+                <div class="achievement-section" id="regionAchievementContent">
+                    <div class="achievement-header">
+                        <span id="achievementRegionTitle">池塘成就</span>
+                        <span id="achievementProgress">0/5</span>
+                    </div>
+                    <div id="achievementList" class="achievement-list"></div>
+                </div>
+                <div class="achievement-section" id="longTermAchievementContent" style="display: none;">
+                    <div class="achievement-header">
+                        <span>长期成就</span>
+                        <span id="longTermAchievementProgress">0/6</span>
+                    </div>
+                    <div id="longTermAchievementList" class="achievement-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="page-panel" id="bonusPage">
+            <div class="page-content">
+                <h3>加成总览</h3>
+                <div class="bonus-section">
+                    <h4>收入加成</h4>
+                    <div class="bonus-item">
+                        <span class="bonus-name">角色等级</span>
+                        <span class="bonus-value" id="bonusLevelIncome">+0%</span>
+                    </div>
+                    <div class="bonus-item">
+                        <span class="bonus-name">装备智力</span>
+                        <span class="bonus-value" id="bonusIntelligenceIncome">+0%</span>
+                    </div>
+                    <div class="bonus-item">
+                        <span class="bonus-name">地区加成</span>
+                        <span class="bonus-value" id="bonusAreaIncome">+0%</span>
+                    </div>
+                    <div class="bonus-item bonus-total">
+                        <span class="bonus-name">总收入加成</span>
+                        <span class="bonus-value" id="bonusTotalIncome">+0%</span>
+                    </div>
+                </div>
+                <div class="bonus-section">
+                    <h4>销售速度加成</h4>
+                    <div class="bonus-item">
+                        <span class="bonus-name">角色敏捷</span>
+                        <span class="bonus-value" id="bonusAgilitySpeed">-0%</span>
+                    </div>
+                    <div class="bonus-item">
+                        <span class="bonus-name">装备敏捷</span>
+                        <span class="bonus-value" id="bonusEquipAgilitySpeed">-0%</span>
+                    </div>
+                    <div class="bonus-item bonus-total">
+                        <span class="bonus-name">总速度加成</span>
+                        <span class="bonus-value" id="bonusTotalSpeed">-0%</span>
+                    </div>
+                </div>
+                <div class="bonus-section">
+                    <h4>战斗属性</h4>
+                    <div class="bonus-item">
+                        <span class="bonus-name">生命</span>
+                        <span class="bonus-value" id="bonusHealth">0</span>
+                    </div>
+                    <div class="bonus-item">
+                        <span class="bonus-name">攻击</span>
+                        <span class="bonus-value" id="bonusAttack">0</span>
+                    </div>
+                    <div class="bonus-item">
+                        <span class="bonus-name">防御</span>
+                        <span class="bonus-value" id="bonusDefense">0</span>
+                    </div>
+                    <div class="bonus-item">
+                        <span class="bonus-name">暴击率</span>
+                        <span class="bonus-value" id="bonusCriticalChance">0%</span>
+                    </div>
+                    <div class="bonus-item">
+                        <span class="bonus-name">暴击伤害</span>
+                        <span class="bonus-value" id="bonusCriticalDamage">0%</span>
+                    </div>
+                    <div class="bonus-item">
+                        <span class="bonus-name">怪物伤害</span>
+                        <span class="bonus-value" id="bonusMonsterDamage">0%</span>
+                    </div>
+                    <div class="bonus-item">
+                        <span class="bonus-name">闪避</span>
+                        <span class="bonus-value" id="bonusDodge">0%</span>
+                    </div>
+                </div>
+                <div class="bonus-section">
+                    <h4>套装效果</h4>
+                    <div id="bonusSetBonuses"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="page-panel" id="backpackPage">
+            <div class="page-content">
+                <div class="resource-item">
+                    <span class="resource-name">金币</span>
+                    <span class="resource-value" id="coinCount">0</span>
+                    <span class="resource-max">/1000</span>
+                </div>
+                <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                    <button class="tab-btn active" id="backpackTab">背包</button>
+                    <button class="tab-btn" id="characterTab">角色</button>
+                </div>
+                <div id="backpackContent" style="display: block;">
+                    <div class="backpack-header" id="backpackHeader" title="升级需1荷包" style="display: flex; justify-content: space-between; align-items: center;">
+                        <span>背包 <span id="backpackUsed">0</span>/<span id="backpackCapacity">10</span></span>
+                        <button class="auto-sell-btn" id="autoSellBtn" title="自动上架（点击开启/关闭）">
+                            <span class="auto-sell-icon">↻</span>
+                        </button>
+                    </div>
+                    <div id="backpackGrid" class="backpack-grid"></div>
+                </div>
+                <div id="characterContent" style="display: none; padding: 8px; border-top: 1px solid #ccc; margin-top: 8px;">
+                    <h3 style="margin-bottom: 8px;">角色信息</h3>
+                    <div id="characterInfo">
+                        <div><strong>等级:</strong> <span id="characterLevel">1</span></div>
+                        <div><strong>经验:</strong> <span id="characterExp">0</span>/<span id="characterExpToNext">100</span></div>
+                        <div><strong>生命值:</strong> <span id="characterHealth">100</span>/<span id="characterMaxHealth">100</span></div>
+                        <div><strong>防御力:</strong> <span id="characterDefense">5</span></div>
+                        <div><strong>攻击力:</strong> <span id="characterAttack">20</span></div>
+                        <div><strong>暴击率:</strong> <span id="characterCritical">5%</span></div>
+                        <div><strong>暴击伤害:</strong> <span id="characterCriticalDamage">150%</span></div>
+                        <div><strong>怪物伤害:</strong> <span id="characterMonsterDamage">0%</span></div>
+                        <div><strong>闪避率:</strong> <span id="characterDodge">3%</span></div>
+                    </div>
+                    <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid #ddd;">
+                        <div><strong>战斗力:</strong> <span id="characterCombatPower">0</span></div>
+                        <div><strong>生存力:</strong> <span id="characterSurvivability">0</span></div>
+                    </div>
+                    <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid #ddd;">
+                        <div><strong>暗淡的珍珠:</strong> <span id="dullPearlCount">0</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="page-panel" id="marketPage">
+            <div class="page-content market-page-content">
+                <div class="market-tabs-header">
+                    <button class="market-street-tab active" data-street="east">东街</button>
+                    <button class="market-street-tab" data-street="west">西街</button>
+                    <button class="market-street-tab" data-street="south">南街</button>
+                    <button class="market-street-tab" data-street="north">北街</button>
+                </div>
+                <div class="market-street-content">
+                    <div class="market-street-panel active" id="eastStreetPanel">
+                        <div class="street-title">东街 - 物品区</div>
+                        <div class="market-item-list" id="eastStreetItemList"></div>
+                    </div>
+                    <div class="market-street-panel" id="westStreetPanel">
+                        <div class="street-title">西街 - 道具区</div>
+                        <div class="market-item-list" id="westStreetItemList"></div>
+                    </div>
+                    <div class="market-street-panel" id="southStreetPanel">
+                        <div class="street-title">南街 - 装备区</div>
+                        <div class="market-item-list" id="southStreetItemList"></div>
+                    </div>
+                    <div class="market-street-panel" id="northStreetPanel">
+                        <div class="street-title">北街 - 工具区</div>
+                        <div class="market-item-list" id="northStreetItemList"></div>
+                    </div>
+                </div>
+            </div>
+            <style>
+                #marketPage {
+                    width: 100%;
+                }
+                .market-page-content {
+                    display: flex;
+                    flex-direction: column;
+                    flex: 1;
+                    padding: 12px;
+                    background: #fff;
+                    border: 1px solid #ccc;
+                    border-radius: 2px;
+                }
+                .market-tabs-header {
+                    display: flex;
+                    gap: 2px;
+                    z-index: 10;
+                    position: sticky;
+                    top: 0;
+                    background: #fff;
+                    padding: 4px 0;
+                }
+                .market-street-tab {
+                    background: #f5f5f5;
+                    border: 1px solid #ddd;
+                    border-bottom: none;
+                    border-radius: 0;
+                    padding: 4px 12px;
+                    font-size: 12px;
+                    cursor: pointer;
+                    color: #666;
+                }
+                .market-street-tab:hover {
+                    background: #eee;
+                    color: #333;
+                }
+                .market-street-tab.active {
+                    background: #fff;
+                    border-color: #ccc;
+                    border-bottom: 1px solid #fff;
+                    margin-bottom: -1px;
+                    color: #333;
+                }
+                .market-street-content {
+                    flex: 1;
+                    background: #fff;
+                    border: 1px solid #ddd;
+                    border-radius: 0;
+                    padding: 12px 12px 4px 12px;
+                    overflow-y: auto;
+                    min-height: 0;
+                }
+                .market-street-panel {
+                    display: none;
+                }
+                .market-street-panel.active {
+                    display: block;
+                }
+                .street-title {
+                    color: #666;
+                    font-size: 13px;
+                    margin-bottom: 10px;
+                    padding-bottom: 6px;
+                    border-bottom: 1px solid #eee;
+                }
+                .market-item-list {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
+                    gap: 2px;
+                }
+                .market-item-row {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    background: #fafafa;
+                    border: 1px solid #e0e0e0;
+                    border-radius: 0;
+                    padding: 3px 5px;
+                    font-size: 11px;
+                    color: #333;
+                }
+                .market-item-row:hover {
+                    background: #f0f0f0;
+                    border-color: #ccc;
+                    color: #000;
+                }
+                .market-shop-row {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: flex-start;
+                    background: #fafafa;
+                    border: 1px solid #e0e0e0;
+                    border-radius: 0;
+                    padding: 3px 5px;
+                    font-size: 11px;
+                    cursor: pointer;
+                    transition: none;
+                }
+                .market-shop-row:hover {
+                    background: #f0f0f0;
+                    border-color: #ccc;
+                }
+                .market-shop-name {
+                    color: #333;
+                    margin-bottom: 1px;
+                }
+                .market-shop-row:hover .market-shop-name {
+                    color: #000;
+                }
+                .mark-yellow:hover .market-shop-name { color: #f5a623; }
+                .mark-green:hover .market-shop-name { color: #4caf50; }
+                .mark-red:hover .market-shop-name { color: #f44336; }
+                .mark-blue:hover .market-shop-name { color: #2196f3; }
+                .mark-yellow:hover .market-shop-info { color: #f5a623; }
+                .mark-green:hover .market-shop-info { color: #4caf50; }
+                .mark-red:hover .market-shop-info { color: #f44336; }
+                .mark-blue:hover .market-shop-info { color: #2196f3; }
+                .market-shop-info {
+                    color: #999;
+                    font-size: 10px;
+                }
+                .shop-visited .market-shop-name,
+                .shop-visited .market-shop-info {
+                    color: #bbb;
+                }
+                .mark-yellow .market-shop-name,
+                .mark-yellow .market-shop-info { color: #f5a623; }
+                .mark-green .market-shop-name,
+                .mark-green .market-shop-info { color: #4caf50; }
+                .mark-red .market-shop-name,
+                .mark-red .market-shop-info { color: #f44336; }
+                .mark-blue .market-shop-name,
+                .mark-blue .market-shop-info { color: #2196f3; }
+                .shop-mark-menu {
+                    position: absolute;
+                    background: #fff;
+                    border: 1px solid #ddd;
+                    border-radius: 4px;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+                    padding: 4px 0;
+                    z-index: 2000;
+                }
+                .mark-option {
+                    padding: 6px 16px;
+                    cursor: pointer;
+                    font-size: 12px;
+                }
+                .mark-option:hover {
+                    background: #f5f5f5;
+                }
+                .mark-square {
+                    display: inline-block;
+                    width: 16px;
+                    height: 16px;
+                    border-radius: 2px;
+                    vertical-align: middle;
+                }
+                .mark-square-yellow { background: #f5a623; }
+                .mark-square-green { background: #4caf50; }
+                .mark-square-red { background: #f44336; }
+                .mark-square-blue { background: #2196f3; }
+                .quality-white { color: #666; }
+                .quality-green { color: #2e7d32; font-weight: normal; }
+                .quality-blue { color: #1565c0; font-weight: normal; }
+                .quality-purple { color: #7b1fa2; font-weight: normal; }
+                .quality-gold { color: #f57c00; font-weight: normal; }
+                .quality-red { color: #c62828; font-weight: normal; }
+            </style>
+        </div>
+        </div>
+
         <aside class="right-sidebar">
             <div class="season">
                 <span id="gameTimeDisplay">第1年 雨季 第5天</span>
@@ -411,27 +757,6 @@
                 <div class="log-content" id="logList"></div>
             </div>
         </aside>
-
-        <aside class="achievement-sidebar">
-            <div class="achievement-tabs">
-                <button class="tab-btn active" id="regionAchievementTab">地区成就</button>
-                <button class="tab-btn" id="longTermAchievementTab">长期成就</button>
-            </div>
-            <div class="achievement-section" id="regionAchievementContent">
-                <div class="achievement-header">
-                    <span id="achievementRegionTitle">池塘成就</span>
-                    <span id="achievementProgress">0/5</span>
-                </div>
-                <div id="achievementList" class="achievement-list"></div>
-            </div>
-            <div class="achievement-section" id="longTermAchievementContent" style="display: none;">
-                <div class="achievement-header">
-                    <span>长期成就</span>
-                    <span id="longTermAchievementProgress">0/6</span>
-                </div>
-                <div id="longTermAchievementList" class="achievement-list"></div>
-            </div>
-        </aside>
     </main>
 
     <footer>
@@ -454,6 +779,190 @@
             </div>
         </div>
     </div>
+
+    <div id="shopDetailModal" class="modal">
+        <div class="modal-content shop-modal-content">
+            <div class="modal-header shop-modal-header">
+                <span id="shopDetailTitle">店铺详情</span>
+                <div class="shop-header-actions">
+                    <a class="shop-action-link" id="shopMessageBoardBtn">[留言板]</a>
+                    <a class="shop-close-link" onclick="Market.closeShopDetail()">[关闭]</a>
+                </div>
+            </div>
+            <div class="modal-body shop-modal-body">
+                <div id="shopDetailContent"></div>
+                <div id="shopMessageBoard" class="shop-message-board" style="display:none;">
+                    <div class="message-board-header">
+                        <span>留言板</span>
+                    </div>
+                    <div class="message-board-list" id="messageBoardList">
+                        <div class="message-empty">暂无留言</div>
+                    </div>
+                    <div class="message-board-input">
+                        <input type="text" id="messageInput" placeholder="写下你的留言..." maxlength="100">
+                        <button id="sendMessageBtn">发送</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .shop-modal-content {
+            max-width: 840px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 0;
+            box-shadow: none;
+        }
+        .shop-modal-header {
+            background: #f5f5f5;
+            border-bottom: 1px solid #eee;
+            padding: 10px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .shop-modal-header span {
+            color: #333;
+            font-size: 14px;
+        }
+        .shop-header-actions {
+            display: flex;
+            gap: 12px;
+        }
+        .shop-action-link {
+            color: #999;
+            cursor: pointer;
+            font-size: 12px;
+            text-decoration: none;
+        }
+        .shop-action-link:hover {
+            color: #333;
+        }
+        .shop-close-link {
+            color: #999;
+            cursor: pointer;
+            font-size: 12px;
+            text-decoration: none;
+        }
+        .shop-close-link:hover {
+            color: #666;
+        }
+        .shop-modal-body {
+            background: #fff;
+            padding: 12px;
+        }
+        .shop-detail-items {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+        }
+        .shop-detail-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #fafafa;
+            border: 1px solid #e0e0e0;
+            border-radius: 0;
+            padding: 3px 12px;
+            cursor: pointer;
+        }
+        .shop-detail-item:hover {
+            background: #f0f0f0;
+            border-color: #ccc;
+        }
+        .shop-detail-item .shop-item-name {
+            color: #333;
+            font-size: 13px;
+            flex: 1;
+        }
+        .shop-detail-item .shop-item-price {
+            color: #666;
+            font-size: 12px;
+            margin: 0 12px;
+        }
+        .shop-detail-item .shop-item-quantity {
+            color: #999;
+            font-size: 12px;
+        }
+        .shop-message-board {
+            margin-top: 12px;
+            border-top: 1px solid #eee;
+            padding-top: 12px;
+        }
+        .message-board-header {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        .message-board-list {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            padding: 8px;
+            margin-bottom: 8px;
+            background: #fafafa;
+        }
+        .message-empty {
+            color: #999;
+            text-align: center;
+            font-size: 12px;
+            padding: 20px;
+        }
+        .message-item {
+            padding: 6px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 12px;
+        }
+        .message-item:last-child {
+            border-bottom: none;
+        }
+        .message-item .message-author {
+            color: #333;
+            font-weight: 500;
+        }
+        .message-item .message-text {
+            color: #666;
+            margin-top: 2px;
+        }
+        .message-item .message-time {
+            color: #999;
+            font-size: 10px;
+            margin-top: 2px;
+        }
+        .message-board-input {
+            display: flex;
+            gap: 8px;
+        }
+        .message-board-input input {
+            flex: 1;
+            padding: 6px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .message-board-input input:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+        .message-board-input button {
+            padding: 6px 16px;
+            background: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .message-board-input button:hover {
+            background: #45a049;
+        }
+        #shopDetailModal.active {
+            display: flex;
+        }
+    </style>
 
     <div id="stallModal" class="modal">
         <div class="modal-content">
@@ -583,6 +1092,7 @@
     </div>
 
     <script src="js/config.js"></script>
+    <script src="js/currency.js"></script>
     <script src="js/state.js"></script>
     <script src="js/item-manager.js"></script>
     <script src="js/utils.js"></script>
@@ -602,6 +1112,7 @@
     <script src="js/adventure.js"></script>
     <script src="js/rpg-ui.js"></script>
     <script src="js/rpg-integration.js"></script>
+    <script src="js/bonus.js"></script>
     <script src="js/settings.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/tool.js"></script>

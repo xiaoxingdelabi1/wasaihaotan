@@ -310,6 +310,31 @@ const Items = {
     
     getCapacity(type) {
         return this[type]?.capacity || 1;
+    },
+
+    register(id, config) {
+        const defaultConfig = {
+            name: id,
+            description: '',
+            type: 'consumable',
+            minPrice: 1,
+            maxPrice: 10,
+            currentPrice: 5,
+            volatility: 1,
+            capacity: 60,
+            properties: {},
+            inMarket: true,
+            inShop: true,
+            shopQuantity: 3
+        };
+        this[id] = { ...defaultConfig, ...config };
+        return this[id];
+    },
+
+    registerMultiple(items) {
+        for (let id in items) {
+            this.register(id, items[id]);
+        }
     }
 };
 
@@ -375,3 +400,37 @@ for (let key in Items) {
         TypeNameMap[key] = Items[key].name;
     }
 }
+
+const ShopNameConfig = {
+    east: {
+        prefixes: ['老', '小', '大', '阿', '胖', '瘦', '高', '矮'],
+        names: ['王', '李', '张', '刘', '陈', '杨', '赵', '黄', '周', '吴', '郑', '孙', '马', '朱', '胡', '林', '何', '郭', '罗', '梁'],
+        suffixes: ['杂货铺', '食品店', '食材铺', '小吃店', '粮行', '干货铺', '鲜果铺', '蔬菜店'],
+        itemTypes: ['consumable', 'ingredient']
+    },
+    west: {
+        prefixes: ['神秘', '古老', '魔法', '奇异', '珍稀', '秘境', '幻影', '星辰'],
+        names: ['宝物', '珍品', '奇货', '秘宝', '灵物', '仙品', '异宝', '神物'],
+        suffixes: ['阁', '轩', '斋', '坊', '楼', '苑', '堂', '居'],
+        itemTypes: ['upgrade', 'treasure', 'material']
+    },
+    south: {
+        prefixes: ['铁匠', '锻造', '精工', '神兵', '龙鳞', '虎威', '战神', '勇者'],
+        names: ['武器', '防具', '装备', '铠甲', '利刃', '宝剑', '战甲', '护具'],
+        suffixes: ['铺', '店', '坊', '阁', '庄', '号', '行', '院'],
+        itemTypes: ['equipment']
+    },
+    north: {
+        prefixes: ['巧手', '匠心', '精艺', '巧匠', '神工', '妙手', '精工', '巧思'],
+        names: ['工具', '器具', '器械', '农具', '利器', '好帮手', '神器', '妙具'],
+        suffixes: ['铺', '店', '坊', '行', '号', '庄', '社', '馆'],
+        itemTypes: ['tool']
+    }
+};
+
+const ShopGeneratorConfig = {
+    shopsPerStreet: 209,
+    minItemsPerShop: 1,
+    maxItemsPerShop: 5,
+    priceVariation: 0.2
+};

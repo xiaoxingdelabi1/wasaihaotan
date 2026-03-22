@@ -15,8 +15,10 @@ const Save = {
             try {
                 const data = JSON.parse(saved);
                 State.loadSaveData(data);
-                Market.render();
+                Market.render('all');
                 Shop.render();
+                Stall.render();
+                Stall.updateTabLabel();
                 UI.update();
                 Time.update();
                 Log.add('存档已加载');
@@ -57,8 +59,10 @@ const Save = {
             try {
                 const data = JSON.parse(event.target.result);
                 State.loadSaveData(data);
-                Market.render();
+                Market.render('all');
                 Shop.render();
+                Stall.render();
+                Stall.updateTabLabel();
                 UI.update();
                 Time.update();
                 Log.add('存档已导入');

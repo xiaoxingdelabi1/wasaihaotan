@@ -484,9 +484,15 @@ const Stall = {
     },
     
     render() {
-        const stallList = document.getElementById('stallList');
+        this.renderStallList('stallList');
+        this.renderStallList('marketStallList');
+    },
+
+    renderStallList(listId) {
+        const stallList = document.getElementById(listId);
+        if (!stallList) return;
         if (State.stallItems.length === 0) {
-            stallList.innerHTML = '<div style="color:#999; padding:4px;">摊位空空，快上架吧</div>';
+            stallList.innerHTML = '<div style="color:#999; padding:20px; text-align:center;">摊位空空，快上架吧</div>';
             return;
         }
         let html = '';
@@ -499,15 +505,15 @@ const Stall = {
             }
             const remainingSeconds = item.timeRemaining.toFixed(2);
             html += `
-                <div class="stall-item" data-index="${index}">
-                    <div class="stall-info">
-                        <span class="stall-item-name">${typeName}</span>
-                        <span>${item.remaining}/${item.total}</span>
-                        <span class="stall-item-price">售价:${item.customPrice}</span>
-                        <span>市场价:${item.basePrice}</span>
-                        <span>⏳ ${remainingSeconds}秒</span>
-                    </div>
-                    <button class="remove-stall-btn" data-index="${index}">下架</button>
+                <div class="stall-item-row" data-index="${index}">
+                    <span class="stall-item-info">
+                        <span>${typeName}</span>
+                        <span style="color:#666;">${item.remaining}/${item.total}</span>
+                    </span>
+                    <span class="stall-item-actions">
+                        <span style="color:#4CAF50; font-weight:bold;">${item.customPrice}金</span>
+                        <button class="remove-stall-btn" data-index="${index}">下架</button>
+                    </span>
                 </div>
             `;
         });
@@ -516,44 +522,52 @@ const Stall = {
     },
     
     bindStallTooltipEvents() {
-        const stallList = document.getElementById('stallList');
-        if (!stallList) return;
-        
-        // 复用背包逻辑：每次渲染重新绑定事件
-        stallList.querySelectorAll('.stall-item').forEach((el, index) => {
-            const item = State.stallItems[index];
-            if (!item) return;
-            
-            let itemType = item.type;
-            let itemData = item;
-            
-            // 如果是装备，使用装备数据
-            if (item.type.startsWith('equipment_') && item.equipmentData) {
-                itemType = 'equipment';
-                itemData = item.equipmentData;
-            }
-            
-            el.addEventListener('mouseenter', (e) => {
-                ItemTooltip.show(e.clientX, e.clientY, itemType, itemData);
-            });
-            
-            el.addEventListener('mouseleave', () => {
-                ItemTooltip.hide();
-            });
-            
-            el.addEventListener('mousemove', (e) => {
-                ItemTooltip.show(e.clientX, e.clientY, itemType, itemData);
+        ['stallList', 'marketStallList'].forEach(listId => {
+            const stallList = document.getElementById(listId);
+            if (!stallList) return;
+
+            stallList.querySelectorAll('.stall-item').forEach((el, index) => {
+                const item = State.stallItems[index];
+                if (!item) return;
+
+                let itemType = item.type;
+                let itemData = item;
+
+                if (item.type.startsWith('equipment_') && item.equipmentData) {
+                    itemType = 'equipment';
+                    itemData = item.equipmentData;
+                }
+
+                el.addEventListener('mouseenter', (e) => {
+                    ItemTooltip.show(e.clientX, e.clientY, itemType, itemData);
+                });
+
+                el.addEventListener('mouseleave', () => {
+                    ItemTooltip.hide();
+                });
+
+                el.addEventListener('mousemove', (e) => {
+                    ItemTooltip.show(e.clientX, e.clientY, itemType, itemData);
+                });
             });
         });
     },
     
     updateTabLabel() {
-        const stallTabCount = document.getElementById('stallTabCount');
-        const upgradeCostDisplay = document.getElementById('upgradeCostDisplay');
         const maxStalls = Utils.getMaxStalls();
-        stallTabCount.textContent = `${State.stallItems.length}/${maxStalls}`;
+        const label = `${State.stallItems.length}/${maxStalls}`;
         const nextLeafCost = Utils.getNextLeafUpgradeCost();
-        upgradeCostDisplay.textContent = `升级需${nextLeafCost}荷叶`;
+        const costLabel = `升级需${nextLeafCost}荷叶`;
+
+        ['stallTabCount', 'marketStallTabCount'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = label;
+        });
+
+        ['upgradeCostDisplay', 'marketUpgradeCostDisplay'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = costLabel;
+        });
     },
     
     startSaleTimer() {
@@ -576,15 +590,15 @@ const Stall = {
 
                     const tax = Utils.calculateTax(item.customPrice);
                     const actualIncome = item.customPrice - tax;
-                    State.coins = Math.min(State.coins + actualIncome, Config.MAX_COINS);
+                    Currency.addWen(actualIncome);
                     State.totalSoldValue += actualIncome;
 
                     const typeName = TypeNameMap[item.type] || item.type;
 
                     if (tax > 0) {
-                        Log.add(`售出1个${typeName}，收入${actualIncome}金币（税${tax})`);
+                        Log.add(`售出1个${typeName}，收入${Currency.formatShort(actualIncome)}（税${Currency.formatShort(tax)}）`);
                     } else {
-                        Log.add(`售出1个${typeName}，收入${actualIncome}金币（免税)`);
+                        Log.add(`售出1个${typeName}，收入${Currency.formatShort(actualIncome)}（免税)`);
                     }
 
                     if (item.remaining <= 0) {

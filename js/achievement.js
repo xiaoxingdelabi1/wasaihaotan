@@ -108,7 +108,7 @@ const Achievement = {
             else if (achievement.itemType === 'skewer') State.skewers -= achievement.count;
         }
         
-        State.coins = Math.min(State.coins + achievement.rewardCoins, Config.MAX_COINS);
+        Currency.addWen(achievement.rewardCoins);
         if (achievement.rewardItems) {
             for (const item of achievement.rewardItems) {
                 const type = ItemTypeMap[item.name];
@@ -133,7 +133,7 @@ const Achievement = {
         const achievement = LongTermAchievements.find(a => a.id === achievementId);
         if (!achievement) return;
         
-        State.coins = Math.min(State.coins + achievement.rewardCoins, Config.MAX_COINS);
+        Currency.addWen(achievement.rewardCoins);
         if (achievement.rewardItems) {
             for (const item of achievement.rewardItems) {
                 const type = ItemTypeMap[item.name];

@@ -38,15 +38,15 @@ const RPGIntegration = {
                         
                         // 应用角色加成
                         const incomeWithBonus = RPGIntegration.applyIncomeBonus(actualIncome);
-                        State.coins = Math.min(State.coins + incomeWithBonus, Config.MAX_COINS);
+                        Currency.addWen(incomeWithBonus);
                         State.totalSoldValue += incomeWithBonus;
                         
                         const typeName = TypeNameMap[item.type] || item.type;
                         
                         if (tax > 0) {
-                            Log.add(`售出1个${typeName}，收入${incomeWithBonus}金币（税${tax}）`);
+                            Log.add(`售出1个${typeName}，收入${Currency.formatShort(incomeWithBonus)}（税${Currency.formatShort(tax)}）`);
                         } else {
-                            Log.add(`售出1个${typeName}，收入${incomeWithBonus}金币（免税）`);
+                            Log.add(`售出1个${typeName}，收入${Currency.formatShort(incomeWithBonus)}（免税）`);
                         }
                         
                         if (item.remaining <= 0) {
@@ -184,9 +184,9 @@ const RPGIntegration = {
         const goldReward = area.level * 50;
         
         Character.gainExperience(expReward);
-        State.coins = Math.min(State.coins + goldReward, Config.MAX_COINS);
+        Currency.addWen(goldReward);
         
-        Log.add(`完成了${area.name}的任务，获得${expReward}经验和${goldReward}金币`);
+        Log.add(`完成了${area.name}的任务，获得${expReward}经验和${Currency.formatShort(goldReward)}`);
         
         // 解锁下一个地区
         const nextAreaIndex = Areas.areas.indexOf(area) + 1;

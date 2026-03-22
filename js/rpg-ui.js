@@ -340,32 +340,42 @@ const RPGUI = {
         });
         
         // 集市子标签页
-        document.getElementById('generalShopTab').addEventListener('click', () => {
-            document.getElementById('generalShopTab').classList.add('active');
-            document.getElementById('blacksmithTab').classList.remove('active');
-            document.getElementById('fruitShopTab').classList.remove('active');
-            document.getElementById('generalShopContent').style.display = 'block';
-            document.getElementById('blacksmithContent').style.display = 'none';
-            document.getElementById('fruitShopContent').style.display = 'none';
-        });
-        
-        document.getElementById('blacksmithTab').addEventListener('click', () => {
-            document.getElementById('blacksmithTab').classList.add('active');
-            document.getElementById('generalShopTab').classList.remove('active');
-            document.getElementById('fruitShopTab').classList.remove('active');
-            document.getElementById('blacksmithContent').style.display = 'block';
-            document.getElementById('generalShopContent').style.display = 'none';
-            document.getElementById('fruitShopContent').style.display = 'none';
-        });
-        
-        document.getElementById('fruitShopTab').addEventListener('click', () => {
-            document.getElementById('fruitShopTab').classList.add('active');
-            document.getElementById('generalShopTab').classList.remove('active');
-            document.getElementById('blacksmithTab').classList.remove('active');
-            document.getElementById('fruitShopContent').style.display = 'block';
-            document.getElementById('generalShopContent').style.display = 'none';
-            document.getElementById('blacksmithContent').style.display = 'none';
-        });
+        const generalShopTab = document.getElementById('generalShopTab');
+        const blacksmithTab = document.getElementById('blacksmithTab');
+        const fruitShopTab = document.getElementById('fruitShopTab');
+
+        if (generalShopTab) {
+            generalShopTab.addEventListener('click', () => {
+                document.getElementById('generalShopTab').classList.add('active');
+                document.getElementById('blacksmithTab').classList.remove('active');
+                document.getElementById('fruitShopTab').classList.remove('active');
+                document.getElementById('generalShopContent').style.display = 'block';
+                document.getElementById('blacksmithContent').style.display = 'none';
+                document.getElementById('fruitShopContent').style.display = 'none';
+            });
+        }
+
+        if (blacksmithTab) {
+            blacksmithTab.addEventListener('click', () => {
+                document.getElementById('blacksmithTab').classList.add('active');
+                document.getElementById('generalShopTab').classList.remove('active');
+                document.getElementById('fruitShopTab').classList.remove('active');
+                document.getElementById('blacksmithContent').style.display = 'block';
+                document.getElementById('generalShopContent').style.display = 'none';
+                document.getElementById('fruitShopContent').style.display = 'none';
+            });
+        }
+
+        if (fruitShopTab) {
+            fruitShopTab.addEventListener('click', () => {
+                document.getElementById('fruitShopTab').classList.add('active');
+                document.getElementById('generalShopTab').classList.remove('active');
+                document.getElementById('blacksmithTab').classList.remove('active');
+                document.getElementById('fruitShopContent').style.display = 'block';
+                document.getElementById('generalShopContent').style.display = 'none';
+                document.getElementById('blacksmithContent').style.display = 'none';
+            });
+        }
         
 
 

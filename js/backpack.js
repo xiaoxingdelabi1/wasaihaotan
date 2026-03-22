@@ -375,18 +375,9 @@ const Backpack = {
             }
             let buttons = '';
             if (slot.type === 'leaf' || slot.type === 'purse' || slot.type === 'piggyBank' || slot.type === 'bug' || slot.type === 'skewer' || slot.type === 'apple' || slot.type === 'banana' || slot.type === 'watermelon' || slot.type === 'pepper' || slot.type === 'carrot' || slot.type === 'spicySkewer') {
-                if (slot.type === 'bug' || slot.type === 'leaf' || slot.type === 'skewer' || slot.type === 'apple' || slot.type === 'banana' || slot.type === 'watermelon' || slot.type === 'pepper' || slot.type === 'carrot' || slot.type === 'spicySkewer' || slot.type === 'purse') {
-                    const totalCount = ItemManager.getCount(slot.type);
-                    buttons = `<button class="use-btn" data-index="${index}" data-type="item" data-action="sell" onclick="Stall.openModalForItem('${slot.type}', ${slot.count}, ${totalCount})">售</button>`;
-                }
-                buttons += `<button class="use-btn" data-index="${index}" data-type="item" data-action="use">使</button>`;
+                buttons = `<button class="use-btn" data-index="${index}" data-type="item" data-action="use">使</button>`;
             } else if (slot.type === 'equipment') {
-                const equipmentIndex = State.equipmentBackpack.indexOf(slot.item);
-                const isTool = slot.item && slot.item.type === 'tool';
-                if (!isTool) {
-                    buttons = `<button class="use-btn" data-index="${index}" data-type="equipment" data-action="sell" data-equipment-index="${equipmentIndex}" onclick="Stall.openModalForItem('equipment', 1, 1, ${equipmentIndex})">售</button>`;
-                }
-                buttons += `<button class="use-btn" data-index="${index}" data-type="equipment" data-action="equip" data-equipment-index="${equipmentIndex}">装</button>`;
+                buttons = `<button class="use-btn" data-index="${index}" data-type="equipment" data-action="equip" data-equipment-index="${State.equipmentBackpack.indexOf(slot.item)}">装</button>`;
             }
             let slotInfo = '';
             if (slot.item && slot.item.type === 'tool') {

@@ -1,6 +1,10 @@
 const State = {
     bugs: 0,
-    coins: 0,
+    wen: 0,
+    copper: 0,
+    silver: 0,
+    gold: 0,
+    cake: 0,
     leaves: 0,
     skewers: 0,
     apples: 0,
@@ -28,6 +32,12 @@ const State = {
     stallItems: [],
     marketItems: [],
     shopItems: [],
+    streetShops: {
+        east: [],
+        west: [],
+        south: [],
+        north: []
+    },
     globalVolatility: 1,
     
     autoSellEnabled: false,
@@ -55,7 +65,11 @@ const State = {
     
     reset() {
         this.bugs = 0;
-        this.coins = 0;
+        this.wen = 0;
+        this.copper = 0;
+        this.silver = 0;
+        this.gold = 0;
+        this.cake = 0;
         this.leaves = 0;
         this.skewers = 0;
         this.apples = 0;
@@ -81,6 +95,7 @@ const State = {
         this.stallItems = [];
         this.marketItems = JSON.parse(JSON.stringify(InitialMarketItems));
         this.shopItems = [];
+        this.streetShops = { east: [], west: [], south: [], north: [] };
         this.globalVolatility = 1;
         this.autoSellEnabled = false;
         this.autoProcess = {
@@ -107,7 +122,11 @@ const State = {
     getSaveData() {
         return {
             bugs: this.bugs,
-            coins: this.coins,
+            wen: this.wen,
+            copper: this.copper,
+            silver: this.silver,
+            gold: this.gold,
+            cake: this.cake,
             leaves: this.leaves,
             skewers: this.skewers,
             apples: this.apples,
@@ -131,6 +150,7 @@ const State = {
             stallItems: this.stallItems,
             marketItems: this.marketItems,
             shopItems: this.shopItems,
+            streetShops: this.streetShops,
             globalVolatility: this.globalVolatility,
             initialDays: this.initialDays,
             startTimestamp: this.startTimestamp,
@@ -162,7 +182,11 @@ const State = {
     
     loadSaveData(data) {
         this.bugs = data.bugs || 0;
-        this.coins = data.coins || 0;
+        this.wen = data.wen || 0;
+        this.copper = data.copper || 0;
+        this.silver = data.silver || 0;
+        this.gold = data.gold || 0;
+        this.cake = data.cake || 0;
         this.leaves = data.leaves || 0;
         this.skewers = data.skewers || 0;
         this.apples = data.apples || 0;
@@ -203,6 +227,7 @@ const State = {
         }
         
         this.shopItems = data.shopItems || [];
+        this.streetShops = data.streetShops || { east: [], west: [], south: [], north: [] };
         this.globalVolatility = data.globalVolatility !== undefined ? data.globalVolatility : 1;
         this.initialDays = data.initialDays !== undefined ? data.initialDays : 4.0;
         this.startTimestamp = data.startTimestamp || Date.now();

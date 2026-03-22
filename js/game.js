@@ -26,7 +26,6 @@ const Game = {
         ItemTooltip.init();
         
         Stall.updateAutoSellButton();
-        Market.render('all');
         Shop.refresh();
         Shop.render();
         Backpack.render();
@@ -38,6 +37,7 @@ const Game = {
         
         this.bindEvents();
         this.startTimers();
+        this.initNavbarState();
         
         if (!saved) {
             Log.add('游戏开始');
@@ -77,40 +77,46 @@ const Game = {
             }
             Save.auto();
         });
-        
-        // 市场标签页切换
-        const marketTabs = ['marketAllTab', 'marketItemsTab', 'marketPropsTab', 'marketEquipmentTab', 'marketToolsTab'];
-        
-        document.getElementById('marketAllTab').addEventListener('click', () => {
-            marketTabs.forEach(id => document.getElementById(id).classList.remove('active'));
-            document.getElementById('marketAllTab').classList.add('active');
-            Market.render('all');
+
+        const navItems = document.querySelectorAll('.nav-item');
+        const pagePanels = document.querySelectorAll('.page-panel');
+        const rightSidebar = document.querySelector('.right-sidebar');
+        const leftSidebar = document.querySelector('.left-sidebar');
+        const navbar = document.querySelector('.navbar');
+
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const pageName = item.dataset.page;
+                const targetPage = document.getElementById(pageName + 'Page');
+
+                navItems.forEach(i => i.classList.remove('active'));
+                pagePanels.forEach(p => p.classList.remove('active'));
+                item.classList.add('active');
+                if (targetPage) {
+                    targetPage.classList.add('active');
+                }
+
+                if (pageName === 'overview') {
+                    rightSidebar.classList.remove('hidden');
+                    leftSidebar.classList.remove('hidden');
+                    navbar.classList.remove('hidden');
+                } else if (pageName === 'market') {
+                    rightSidebar.classList.add('hidden');
+                    leftSidebar.classList.add('hidden');
+                    navbar.classList.remove('hidden');
+                } else {
+                    rightSidebar.classList.add('hidden');
+                    leftSidebar.classList.add('hidden');
+                    navbar.classList.remove('hidden');
+                }
+
+                if (pageName === 'market') {
+                    Market.init();
+                    Market.render();
+                }
+            });
         });
-        
-        document.getElementById('marketItemsTab').addEventListener('click', () => {
-            marketTabs.forEach(id => document.getElementById(id).classList.remove('active'));
-            document.getElementById('marketItemsTab').classList.add('active');
-            Market.render('items');
-        });
-        
-        document.getElementById('marketPropsTab').addEventListener('click', () => {
-            marketTabs.forEach(id => document.getElementById(id).classList.remove('active'));
-            document.getElementById('marketPropsTab').classList.add('active');
-            Market.render('props');
-        });
-        
-        document.getElementById('marketEquipmentTab').addEventListener('click', () => {
-            marketTabs.forEach(id => document.getElementById(id).classList.remove('active'));
-            document.getElementById('marketEquipmentTab').classList.add('active');
-            Market.render('equipment');
-        });
-        
-        document.getElementById('marketToolsTab').addEventListener('click', () => {
-            marketTabs.forEach(id => document.getElementById(id).classList.remove('active'));
-            document.getElementById('marketToolsTab').classList.add('active');
-            Market.render('tools');
-        });
-        
+
         document.getElementById('catchBugBtn').addEventListener('click', () => {
             const result = Backpack.addResource('bug', 1);
             if (!result.success) {
@@ -185,7 +191,16 @@ const Game = {
             if (State.stallItems.length === 0) return;
             Stall.clearAll();
         });
-        
+
+        document.getElementById('marketStallBtn').addEventListener('click', () => {
+            Stall.openModal();
+        });
+
+        document.getElementById('marketClearStallBtn').addEventListener('click', () => {
+            if (State.stallItems.length === 0) return;
+            Stall.clearAll();
+        });
+
         document.getElementById('stallTabBtn').addEventListener('click', () => {
             UI.setActiveTab(document.getElementById('stallTabBtn'), document.getElementById('stallPane'));
         });
@@ -218,11 +233,14 @@ const Game = {
             UI.showStallBackpack();
         });
         
-        document.getElementById('tabMarketShop').addEventListener('click', (e) => {
-            e.preventDefault();
-            UI.showMarketShop();
-        });
-        
+        const tabMarketShop = document.getElementById('tabMarketShop');
+        if (tabMarketShop) {
+            tabMarketShop.addEventListener('click', (e) => {
+                e.preventDefault();
+                UI.showMarketShop();
+            });
+        }
+
         document.getElementById('tabHotel').addEventListener('click', (e) => {
             e.preventDefault();
             UI.showHotel();
@@ -269,7 +287,9 @@ const Game = {
         }
         
         this.bindDevEvents();
-        
+
+        UI.bindMarketFilterEvents();
+
         UI.hideAllMainPanes();
         document.getElementById('mainButtonGroup').style.display = 'flex';
     },
@@ -301,22 +321,27 @@ const Game = {
         document.getElementById('devAddCoinsBtn').addEventListener('click', () => {
             let amount = parseInt(document.getElementById('devAddCoins').value);
             if (isNaN(amount) || amount < 1) amount = 1;
-            State.coins = Math.min(State.coins + amount, Config.MAX_COINS);
-            Log.add(`开发者增加了${amount}金币`);
+            Currency.addWen(amount);
+            Log.add(`开发者增加了${Currency.formatShort(amount)}`);
             UI.update();
             Save.auto();
-            document.getElementById('saveStatus').textContent = '金币已增加';
+            document.getElementById('saveStatus').textContent = '货币已增加';
             setTimeout(() => document.getElementById('saveStatus').textContent = '', 2000);
         });
         
         document.getElementById('devSetCoinsBtn').addEventListener('click', () => {
             let amount = parseInt(document.getElementById('devSetCoins').value);
             if (isNaN(amount) || amount < 0) amount = 0;
-            State.coins = Math.min(amount, Config.MAX_COINS);
-            Log.add(`开发者设置金币为${amount}`);
+            State.wen = 0;
+            State.copper = 0;
+            State.silver = 0;
+            State.gold = 0;
+            State.cake = 0;
+            Currency.addWen(amount);
+            Log.add(`开发者设置货币为${Currency.formatShort(amount)}`);
             UI.update();
             Save.auto();
-            document.getElementById('saveStatus').textContent = '金币已设置';
+            document.getElementById('saveStatus').textContent = '货币已设置';
             setTimeout(() => document.getElementById('saveStatus').textContent = '', 2000);
         });
         
@@ -585,6 +610,39 @@ const Game = {
     
     startAutoProcess() {
         // Automation now uses per-card intervals instead of global process
+    },
+    
+    initNavbarState() {
+        const navbar = document.querySelector('.navbar');
+        const toggleBtn = document.getElementById('navbarToggle');
+        
+        if (!navbar || !toggleBtn) {
+            console.warn('Navbar or toggle button not found');
+            return;
+        }
+        
+        const isCollapsed = localStorage.getItem('navbarCollapsed') === 'true';
+        if (isCollapsed) {
+            navbar.classList.add('collapsed');
+            toggleBtn.title = '展开导航栏';
+        }
+    },
+    
+    toggleNavbar() {
+        const navbar = document.querySelector('.navbar');
+        const toggleBtn = document.getElementById('navbarToggle');
+        
+        if (!navbar || !toggleBtn) return;
+        
+        const isCollapsed = navbar.classList.toggle('collapsed');
+        
+        if (isCollapsed) {
+            toggleBtn.title = '展开导航栏';
+            localStorage.setItem('navbarCollapsed', 'true');
+        } else {
+            toggleBtn.title = '折叠导航栏';
+            localStorage.setItem('navbarCollapsed', 'false');
+        }
     }
 };
 

@@ -64,12 +64,12 @@ const Time = {
     },
     
     hotelStay() {
-        if (State.coins < Config.HOTEL_COST) {
-            alert(`金币不足 ${Config.HOTEL_COST}，无法借宿`);
+        if (!Currency.canAfford(Config.HOTEL_COST)) {
+            alert(`货币不足 ${Currency.formatShort(Config.HOTEL_COST)}，无法借宿`);
             return;
         }
-        State.coins -= Config.HOTEL_COST;
-        Log.add(`花费${Config.HOTEL_COST}金币借宿一晚`);
+        Currency.subtractWen(Config.HOTEL_COST);
+        Log.add(`花费${Currency.formatShort(Config.HOTEL_COST)}借宿一晚`);
 
         const now = Date.now();
         const elapsedHours = (now - State.startTimestamp) / 3600000;

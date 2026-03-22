@@ -195,7 +195,7 @@ const Combat = {
             const gold = monster.gold;
             
             Character.gainExperience(exp);
-            State.coins = Math.min(State.coins + gold, Config.MAX_COINS);
+            Currency.addWen(gold);
             
             if (monster.drops && monster.drops.length > 0) {
                 monster.drops.forEach(drop => {
@@ -271,9 +271,10 @@ const Combat = {
             RPGUI.renderAreaMonsters();
         } else {
             this.log(`💀 战斗失败！`);
-            const goldLoss = Math.floor(State.coins * 0.1);
-            State.coins = Math.max(0, State.coins - goldLoss);
-            Log.add(`损失了 ${goldLoss} 金币，请使用道具恢复血量后继续战斗`);
+            const totalWen = Currency.getTotalWen();
+            const goldLoss = Math.floor(totalWen * 0.1);
+            Currency.subtractWen(goldLoss);
+            Log.add(`损失了 ${Currency.formatShort(goldLoss)}，请使用道具恢复血量后继续战斗`);
         }
         
         this.currentMonster = null;
@@ -460,7 +461,7 @@ const Combat = {
             const gold = monster.gold;
             
             Character.gainExperience(exp);
-            State.coins = Math.min(State.coins + gold, Config.MAX_COINS);
+            Currency.addWen(gold);
             
             if (monster.drops && monster.drops.length > 0) {
                 monster.drops.forEach(drop => {
